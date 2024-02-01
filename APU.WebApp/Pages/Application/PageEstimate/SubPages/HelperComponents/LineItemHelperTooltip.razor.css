@@ -1,0 +1,30 @@
+﻿.lineitemhelper-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    line-height: 28px;
+    text-align: center;
+    background-color: white;
+    border-radius: 5px;
+    border: 1px solid #d5d5d5;
+    cursor: pointer;
+}
+
+
+.lineitemhelper-tt-content {
+    display: flex;
+    flex-direction: column;
+}
+
+    .lineitemhelper-tt-content p {
+        margin-block: 2px;
+        font-size: 14px;
+        font-weight: 400;
+        color: black !important;
+    }
+
+    .lineitemhelper-tt-content span {
+        color: black;
+        font-size: 14px;
+        font-weight: 600;
+    }

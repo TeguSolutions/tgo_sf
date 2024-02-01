@@ -1,0 +1,86 @@
+﻿@inherits DlgCertificateManagerVM
+
+<SfDialog @bind-Visible="@IsVisible" IsModal="true" Width="400px" Target="estimate-container" CloseOnEscape="false">
+
+    <DialogTemplates>
+        <Header>
+            Add Certificate
+        </Header>
+        <Content>
+
+            <EditForm Model="@NewItem" OnValidSubmit="@DialogSubmit">
+                <DataAnnotationsValidator />
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Name:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.Name" Placeholder="Name" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => NewItem.Name)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Initials:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.Initials" Placeholder="Initials" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => NewItem.Initials)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Issued By:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.IssuedBy" Placeholder="Issued By" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => NewItem.IssuedBy)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Issued At:</span>
+                    <div class="w-100">
+                        <SfDatePicker @bind-Value="@NewItem.IssuedAt" Placeholder="Issued At" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => NewItem.IssuedAt)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Expires At:</span>
+                    <div class="w-100">
+                        <SfDatePicker @bind-Value="@NewItem.ExpiresAt" Placeholder="Expires At" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => NewItem.ExpiresAt)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Link:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.Link" Placeholder="Link" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => NewItem.Link)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <div class="me-2" @onclick:preventDefault>
+                        <SfButton Content="Cancel" OnClick="@DialogCancel" />
+                    </div>
+                    <SfButton Content="Submit" IsPrimary="true" />
+                </div>
+
+            </EditForm>
+
+        </Content>
+    </DialogTemplates>
+
+</SfDialog>

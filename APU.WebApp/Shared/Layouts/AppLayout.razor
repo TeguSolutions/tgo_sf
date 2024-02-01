@@ -1,0 +1,19 @@
+﻿@inherits AppLayoutVM
+
+@*noselect*@
+<div class="noselect app-layout">
+
+    <div class="app-layout-header">
+        <Header/>
+    </div>
+
+    <div id="app-layout-body" class="app-layout-body">
+        <SfToast ID="toast_default" @ref="ToastObj" NewestOnTop="true">
+            <ToastPosition X="Center" Y="Top"/>
+            <ToastEvents OnClick="@ToastOnClickHandler"/>
+        </SfToast>
+
+        @Body
+    </div>
+
+</div>

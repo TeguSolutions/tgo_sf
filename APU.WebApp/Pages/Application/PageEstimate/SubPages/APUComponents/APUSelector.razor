@@ -1,0 +1,36 @@
+﻿@inherits APUSelectorVM
+
+<div class="popup-apuselector @PopupCss" style="">
+    
+    <div style="min-height: 25px; height: 25px; display: flex;">
+        <span style="color: red; margin-inline: 4px; margin-top: auto; margin-bottom: auto;">Copy and Replaces APU!</span>
+    </div>
+
+    <SfTextBox @ref="@TbSearch" Placeholder="Search" ShowClearButton="true"
+               Input="@TbFilterInputChanged" @onkeypress="@TbFilterKeyPressed" />
+
+    <SfGrid DataSource="@FilteredApus" Height="241" RowHeight="30" AllowSelection="false" AllowSorting="true" EnableVirtualization="true">
+        <GridSelectionSettings Type="@SfGridSelectionType.Single"/>
+        <GridColumns>
+            <GridColumn Field="@nameof(ApuSelectorModel.Id)" IsPrimaryKey="true" Width="0" Visible="false"/>
+            <GridColumn Field="@nameof(ApuSelectorModel.Description)" HeaderText="Description" HeaderTextAlign="SfGridTextAlign.Left" TextAlign="@SfGridTextAlign.Left" />
+
+            <GridColumn Field="@nameof(ApuSelectorModel.ProjectName)" HeaderText="Project" HeaderTextAlign="SfGridTextAlign.Left" TextAlign="@SfGridTextAlign.Left" Width="250" />
+            
+            <GridColumn Field="@nameof(ApuSelectorModel.LastUpdatedAt)" HeaderText="Date" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center"
+                        Width="130" Type="@ColumnType.Date" Format="d"/>
+            
+            <GridColumn HeaderText="" HeaderTextAlign="SfGridTextAlign.Center" Width="80">
+                <Template>
+                    @{
+                        var apu = (ApuSelectorModel)context;
+
+                        <div class="grid-btn" @onclick="(() => SelectApu(apu))">
+                            <SfIcon IconCss="m-auto" Name="@IconName.CircleAdd"/>
+                        </div>
+                    }
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+</div>

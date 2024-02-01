@@ -1,0 +1,97 @@
+﻿@inherits DlgEquipmentManagerVM
+
+<SfDialog @bind-Visible="@IsVisible" IsModal="true" Width="400px" Target="@Target" CloseOnEscape="false">
+
+    <DialogTemplates>
+        <Header>
+            <span>@Mode.Name Equipment</span>
+        </Header>
+        <Content>
+            
+            <EditForm @ref="@Form" Model="@Equipment">
+                <DataAnnotationsValidator />
+
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Description:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Equipment.Description" Placeholder="Description" Multiline="true"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Equipment.Description)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Unit:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Equipment.Unit" Placeholder="Unit"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Equipment.Unit)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Qty:</span>
+                    <div class="w-100">
+                        <SfNumericTextBox @bind-Value="@Equipment.Quantity" Placeholder="Qty" Min="0" Format="0" ShowSpinButton="false"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Equipment.Quantity)"/>
+                        </div>
+                    </div>
+                </div>
+                                    
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Price:</span>
+                    <div class="w-100">
+                        <SfNumericTextBox @bind-Value="@Equipment.Price" Placeholder="Price" Min="0" Format="c2" Currency="USD" ShowSpinButton="false"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Equipment.Price)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Vendor:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Equipment.Vendor" Placeholder="Vendor"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Equipment.Vendor)"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Phone:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Equipment.Phone" Placeholder="Phone"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Equipment.Phone)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex ">
+                    <span class="me-2 mt-4px wmm-95px text-end">Link:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Equipment.Link" Placeholder="Link" Type="@InputType.URL" Multiline="true"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Equipment.Link)"/>
+                        </div>
+                    </div>
+                </div>
+
+            </EditForm>
+            
+            <div class="d-flex justify-content-end mt-2">
+                <SfButton Content="Cancel" OnClick="@DialogCancel"/>
+                @foreach(var (button, mode) in Mode.Buttons)
+                {
+                    <SfButton CssClass="ms-2" Content="@button" @onclick="@(() => DialogSubmit(mode))"/>
+                }
+            </div>
+
+        </Content>
+    </DialogTemplates>
+
+</SfDialog>

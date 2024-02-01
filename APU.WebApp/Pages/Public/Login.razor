@@ -1,0 +1,49 @@
+﻿@layout PublicLayout
+@inherits LoginVM
+@page "/login"
+
+<PageTitle>Login | TechGroupOne</PageTitle>
+
+<div class="login-container">
+    <div class="login-form">
+        <EditForm Model="@User" OnValidSubmit="@Login">
+            <DataAnnotationsValidator />
+            
+            <div class="d-flex flex-column">
+                
+                <div class="mx-2 mb-3">   
+                    <div class="login-logo"/>
+                </div>
+
+                <div class="mb-2">
+                    <label for="first-name">Email</label>
+                    <SfTextBox ID="first-name" @bind-Value="User.Email" Type="@InputType.Email" Placeholder="Email"/>
+                    <div style="font-size: 0.8rem; color: red;">
+                        <ValidationMessage For="@(() => User.Email)"/>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password">Password</label>
+                    <SfTextBox ID="password" @bind-Value="User.Password" Type="@InputType.Password" Placeholder="Password"/>
+                    <div style="font-size: 0.8rem; color: red;">
+                        <ValidationMessage For="@(() => User.Password)"/>
+                    </div>
+                </div>
+                
+                @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+                {
+                    <p style="text-align: center; font-size: 0.9rem; color: red;">@ErrorMessage</p>
+                }
+
+                <SfButton CssClass="mx-auto mb-2 w-100px" Content="Login" IsPrimary="true"/>
+                
+                <div class="mx-auto" @onclick:preventDefault>
+                    <SfButton CssClass="e-flat" Content="Forgot your password?" @onclick="@NavigateToForgotPassword"/>
+                </div>
+
+            </div>
+
+        </EditForm>
+    </div>
+</div>

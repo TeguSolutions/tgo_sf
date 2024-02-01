@@ -1,0 +1,86 @@
+﻿@inherits DlgApuManagerVM
+
+<SfDialog @bind-Visible="@IsVisible" IsModal="true" Width="400px" Target="estimate-container" CloseOnEscape="false">
+
+    <DialogTemplates>
+        <Header>
+            Add Estimate Item (APU)
+        </Header>
+        <Content>
+
+            <EditForm Model="@FormClass" OnValidSubmit="@DialogSubmit">
+                <DataAnnotationsValidator />
+
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Group Id:</span>
+                    <div class="w-100">
+                        <SfNumericTextBox @bind-Value="@FormClass.GroupId" Placeholder="Group Id" Format="0" ShowSpinButton="false" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.GroupId)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Item Id:</span>
+                    <div class="w-100">
+                        <SfNumericTextBox @bind-Value="@FormClass.ItemId" Placeholder="Item Id" Format="0" ShowSpinButton="false" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.ItemId)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Code:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.Code" Placeholder="Code" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Description)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Description:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.Description" Placeholder="Description" Multiline="true" HtmlAttributes="@(new Dictionary<string, object> { { "rows", 4 } })" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Description)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Unit:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.Unit" Placeholder="Unit" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Unit)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Qty:</span>
+                    <div class="w-100">
+                        <SfNumericTextBox @bind-Value="@FormClass.Quantity" Placeholder="Qty" Min="0" Format="0.00" ShowSpinButton="false" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Quantity)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <div class="me-2" @onclick:preventDefault>
+                        <SfButton Content="Cancel" OnClick="@DialogCancel" />
+                    </div>
+                    <SfButton Content="Submit" IsPrimary="true" />
+                </div>
+
+            </EditForm>
+
+        </Content>
+    </DialogTemplates>
+
+</SfDialog>

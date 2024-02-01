@@ -1,0 +1,24 @@
+﻿.items-container {
+    background-image: url(../imgs/bg-estimate.jpg);
+    width: 100vw;
+    height: calc(100vh - 50px);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding: 20px;
+}
+
+.items-content {
+    display: flex;
+    flex-direction: column;
+    max-width: 1800px;
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.items-grid-container {
+    width: calc(100vw - 40px);
+    height: calc(100vh - 130px);
+    max-width: 1800px;
+}

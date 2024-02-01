@@ -1,0 +1,38 @@
+﻿@inherits DlgConfirmationVM<T>
+@typeparam T
+
+<SfDialog @bind-Visible="@IsVisible" IsModal="true" Width="@Width" Target="@Target" CloseOnEscape="false">
+    
+    <DialogTemplates>
+        
+        <Header>
+            <span>@HeaderText</span>
+        </Header>
+        
+        <Content>
+            <div class="d-flex flex-column justify-content-center">
+                <p class="mb-1 fw-500">@Description</p>
+                @if (!string.IsNullOrWhiteSpace(Value))
+                {
+                    <span>@Value</span>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(VerificationText))
+                {
+                    <span class="my-1">Type the following text to complete:</span>
+                    <span class="mb-1 fw-bolder">@VerificationText</span>
+                    <SfTextBox @bind-Value="@TypedVerificationText" Placeholder="Verification text" />
+                }
+            </div>
+            
+
+
+            <div class="d-flex justify-content-end mt-2">
+                <SfButton Content="Cancel" OnClick="@DialogCancel"/>
+                <SfButton CssClass="ms-2" Content="Ok" @onclick="@DialogSubmit"/>
+            </div>
+        </Content>
+        
+
+    </DialogTemplates>
+</SfDialog>

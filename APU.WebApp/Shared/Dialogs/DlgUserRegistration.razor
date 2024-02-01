@@ -1,0 +1,52 @@
+﻿@inherits DlgUserRegistrationVM
+
+<SfDialog @bind-Visible="@IsVisible" IsModal="true" Width="400px" Target="@Target" CloseOnEscape="false">
+    
+    <DialogTemplates>
+        <Header>
+            <span>New User Registration</span>
+        </Header>
+        
+        <Content>
+            <EditForm @ref="@Form" Model="@FormUser">
+                <DataAnnotationsValidator />
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-60px text-end">Name:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormUser.Name" Placeholder="Name" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormUser.Name)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-60px text-end">Email:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormUser.Email" Placeholder="Email" Type="@InputType.Email"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormUser.Email)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-60px text-end">Initials:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormUser.Initials" Placeholder="Initials" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormUser.Initials)" />
+                        </div>
+                    </div>
+                </div>
+
+            </EditForm>
+            
+            <div class="d-flex justify-content-end mt-2">
+                <SfButton CssClass="me-2" Content="Cancel" OnClick="@DialogCancel"/>
+                <SfButton Content="Register" OnClick="@DialogSubmit" />
+            </div>
+        </Content>
+    </DialogTemplates>
+</SfDialog>

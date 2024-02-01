@@ -1,0 +1,213 @@
+﻿@layout AppLayout
+@inherits BidsPageVM
+@page "/estimates/bids"
+
+<PageTitle>Estimates - Bids | TechGroupOne</PageTitle>
+
+<div id="bids-container" class="bids-container">
+
+    <DlgConfirmation @ref="@(ConfirmationDialogProject)" T="Project" Target="bids-container" HeaderText="Delete Confirmation"/>
+    <DlgProjectManager @ref="@ProjectManager" Target="bids-container"/>
+
+    <div class="bids-content">
+        
+        <div class="d-flex mb-2">
+   
+            <SfTextBox CssClass="me-1" Width="250px" Placeholder="Search" ShowClearButton="true"
+                       Input="@TbFilterInputChanged" @onkeypress="@TbFilterKeyPressed" />
+            <SfButton IconCss="e-icons e-icon-search" CssClass="me-3" IsPrimary="true" OnClick="@GetFilteredProjects"/>
+
+            <SfCheckBox TChecked="bool?" CssClass="my-auto me-3 e-customsize" Checked="@IsBlocked" Indeterminate="@(IsBlocked == null)" Label="Blocked:" 
+                        LabelPosition="@ButtonLabelPosition.Before" @onclick="@IsBlockedChanged"/>
+            
+            <SfButton CssClass="me-3" Content="Duplicate" @onclick="@DuplicateSelectedProject"/>
+
+            <SfButton CssClass="ms-auto me-2" Content="Estimate" OnClick="@NavigateToEstimate"/>
+            <SfButton IconCss="e-icons e-icon-export-excel" CssClass="me-3 w-60px" OnClick="@ExportAsExcel"/>
+
+            <SfButton IconCss="e-icons e-icon-plus" CssClass="e-success w-60px" OnClick="@ProjectManagerOpen"/>
+
+        </div>
+
+        <div class="bids-grid-container">
+
+            <SfGrid @ref="@Grid" ID="GridProject" Height="100%" Width="100%" DataSource="@FilteredProjects"
+                    AllowPaging="true" AllowTextWrap="true" AllowSorting="true" AllowResizing="false" 
+                    AllowExcelExport="true" AllowPdfExport="true">
+
+                <GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true" Mode="SfGridEditMode.Normal" />
+                <GridTextWrapSettings WrapMode="WrapMode.Content" />
+                <GridEvents TValue="Project" CommandClicked="@DataGridCommandClick" OnActionBegin="@DataGridOnActionBegin" />
+                <GridPageSettings PageSize="12" PageSizes="@SyncfusionHelper.GridPageSizes" />
+
+                <GridColumns>
+                    <GridColumn Field="Id" IsPrimaryKey="true" Width="0" Visible="false"/>
+
+                    <GridColumn HeaderText="Manage" Width="120" TextAlign="SfGridTextAlign.Center">
+                        <GridCommandColumns>
+                            <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-edit", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-delete", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Save" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-save", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Cancel" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-cancel-icon", CssClass = "e-flat" })"/>
+                        </GridCommandColumns>
+                    </GridColumn>
+
+                    <GridColumn Field="IsBlocked" HeaderText="B" HeaderTextAlign="SfGridTextAlign.Center" Width="60" EditType="@EditType.BooleanEdit">
+                        <Template>
+                            <SfCheckBox Disabled="true" Checked="@(((Project)context).IsBlocked)"/>
+                        </Template>
+                        <EditTemplate>
+                            @if (Liu.IsAdministrator || Liu.IsSupervisor)
+                            {
+                                <SfCheckBox @bind-Checked="@(((Project)context).IsBlocked)"/>
+                            }
+                            else
+                            {
+                                <SfCheckBox Disabled="true" Checked="@(((Project)context).IsBlocked)" />
+                            }
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="ProjectName" HeaderText="Bid Name" HeaderTextAlign="SfGridTextAlign.Center" Width="400">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((Project)context).ProjectName)" Multiline="true"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="Owner" HeaderText="Owner" HeaderTextAlign="SfGridTextAlign.Center" Width="140">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((Project)context).Owner)" Multiline="true"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="Phone" HeaderText="Phone" HeaderTextAlign="SfGridTextAlign.Center" Width="120">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((Project)context).Phone)" Multiline="true"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="Email" HeaderText="Email" HeaderTextAlign="SfGridTextAlign.Center" Width="160">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((Project)context).Email)" Type="@InputType.Email" Multiline="true"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="Address" HeaderText="Address" HeaderTextAlign="SfGridTextAlign.Center" Width="180">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((Project)context).Address)" Multiline="true"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="City.Name" HeaderText="City" HeaderTextAlign="SfGridTextAlign.Center" Width="140">
+                        <Template>
+                            @{
+                                var project = (Project)context;
+                                if (project.City is not null)
+                                {
+                                    <span>@project.City.Name</span>
+                                }
+                            }
+                        </Template>
+                        <EditTemplate>
+                            <SfComboBox TValue="int?" TItem="City" Placeholder="Select a City" DataSource="@Cities" PopupWidth="250"
+                                        Value="@(((Project)context).CityId)"
+                                        ValueChanged="@(arg => CityChanged(arg, (Project)context))">
+                                <ComboBoxFieldSettings Value="@nameof(City.Id)" Text="@nameof(City.Name)"/>
+                            </SfComboBox>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="State" HeaderText="ST" HeaderTextAlign="SfGridTextAlign.Center" Width="60" AllowEditing="false">
+                        <EditTemplate>
+                            <span>@(((Project)context).State)</span>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="Zip" HeaderText="Zip" HeaderTextAlign="SfGridTextAlign.Center" Width="90">
+                        <EditTemplate>
+                            <SfNumericTextBox @bind-Value="@(((Project)context).Zip)" Placeholder="Zip" Min="0" Format="0" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="Estimator" HeaderText="Estimator" HeaderTextAlign="SfGridTextAlign.Center" Width="100">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((Project)context).Estimator)"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="Link" HeaderText="Link" HeaderTextAlign="SfGridTextAlign.Center" Width="200">
+                        <Template>
+                            @{
+                                var link = ((Project)context).Link;
+                                if (!string.IsNullOrWhiteSpace(link))
+                                {
+                                    <SfTooltip Content="@link">
+                                        <SfButton CssClass="e-link mx-auto w-100" Content="Link" @onclick="@(() => JS.OpenUrlInNewTab(link))"/>
+                                    </SfTooltip>
+                                }
+                            }
+                        </Template>
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((Project)context).Link)" Multiline="true"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="GrossLabor" HeaderText="Gr Lbr" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.00">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((Project)context).GrossLabor)" Format="0.00" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="GrossMaterials" HeaderText="Gr Mtr" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.00">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((Project)context).GrossMaterials)" Format="0.00" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="GrossEquipment" HeaderText="Gr Eq" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.00">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((Project)context).GrossEquipment)" Format="0.00" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="GrossContracts" HeaderText="Gr Ctr" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.00">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((Project)context).GrossContracts)" Format="0.00" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="Supervision" HeaderText="Sup" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.00">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((Project)context).Supervision)" Format="0.00" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="Tools" HeaderText="Tools" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.00">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((Project)context).Tools)" Format="0.00" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="Bond" HeaderText="Bond" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.00">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((Project)context).Bond)" Format="0.00" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="SalesTax" HeaderText="S Tax" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.00">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((Project)context).SalesTax)" Format="0.00" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    
+                    <GridColumn Field="LastUpdatedAt" HeaderText="Date" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center" Width="130" Type="@ColumnType.Date" Format="d" AllowEditing="false"/>
+                    <GridColumn Field="LastUpdatedBy.Initials" HeaderText="User" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center" Width="100" AllowEditing="false" />
+
+                </GridColumns>
+            </SfGrid>
+
+        </div>
+
+    </div>
+
+</div>

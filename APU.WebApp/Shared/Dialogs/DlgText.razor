@@ -1,0 +1,24 @@
+﻿@inherits DlgTextVM<T>
+@typeparam T
+
+<SfDialog @bind-Visible="@IsVisible" IsModal="true" Width="@Width" Target="@Target" CloseOnEscape="false">
+
+    <DialogTemplates>
+
+        <Header>
+            <span>@HeaderText</span>
+        </Header>
+
+        <Content>
+            <div class="d-flex">
+                <SfTextBox @bind-Value="@Text"/>
+            </div>
+
+            <div class="d-flex justify-content-end mt-2">
+                <SfButton Content="Cancel" OnClick="@DialogCancel" />
+                <SfButton CssClass="ms-2" Content="Ok" @onclick="@DialogSubmit" />
+            </div>
+        </Content>
+
+    </DialogTemplates>
+</SfDialog>

@@ -1,0 +1,50 @@
+﻿.usermanager-container {
+    background-image: url(../imgs/bg-estimate.jpg);
+    width: 100vw;
+    height: calc(100vh - 50px);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding: 20px;
+}
+
+.usermanager-content {
+    display: flex;
+    flex-direction: column;
+    max-width: 1400px;
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.usermanager-grid-container {
+    width: calc(100vw - 40px);
+    height: calc(100vh - 130px);
+    max-width: 1400px;
+}
+
+.tab {
+    width: 340px;
+    margin-right: auto;
+    background: #fefefe;
+    box-shadow: 0 0 6px 2px #e8e8e8;
+}
+
+    .tab tr {
+        height: 26.2px;
+    }
+
+    .tab th {
+        font-weight: 500;
+        font-size: 0.85rem !important;
+        padding: .15rem .25rem !important;
+        text-align: center;
+    }
+
+    .tab td {
+        font-weight: 400;
+        font-size: 0.8rem !important;
+        padding: .15rem .25rem !important;
+        vertical-align: middle;
+        text-align: center;
+    }

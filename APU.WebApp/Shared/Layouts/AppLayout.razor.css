@@ -1,0 +1,32 @@
+﻿.app-layout {
+    display: flex;
+    flex-direction: column;
+/*    position: relative;*/
+    min-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+}
+
+.app-layout-header {
+/*    position: absolute;*/
+    min-height: 50px;
+    /*left: 0px;*/
+    width: 100vw;
+    z-index: var(--ts-zindex-lvl4);
+}
+
+.app-layout-body {
+    /* needed for the absolute dialogs */
+    /*    position: absolute;*/
+/*    position: relative;*/
+    display: flex;
+    flex-direction: column;
+    /*    left: 0px;
+    top: 50px;*/
+    height: 100vh;
+    /*    height: calc(100vh - 50px);*/
+    width: 100vw;
+    overflow: hidden;
+    overflow-y: auto;
+    /*    background-color: aquamarine;*/
+}

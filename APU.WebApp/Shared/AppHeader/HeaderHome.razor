@@ -1,0 +1,50 @@
+﻿@inherits HeaderHomeVM
+
+<div class="d-flex flex-wrap">
+    
+    <AuthorizeView Roles="@($"{RD.AdministratorText},{RD.EstimatorText},{RD.SupervisorText}")">
+        <Authorized>
+            <a class="headerlink" href="@NavS.Estimates.Base">Estimate</a>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="@RD.AdministratorText">
+        <Authorized>
+            <a class="headerlink">RFQ</a>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="@($"{RD.AdministratorText},{RD.SupervisorText}")">
+        <Authorized>
+            <a class="headerlink @Dict[NavS.Home.Municipalities]" href="@NavS.Home.Municipalities"
+               @onclick="(() => Navigate(NavS.Home.Municipalities))">Municipalities</a>
+
+            <a class="headerlink @Dict[NavS.Home.Certificates]" href="@NavS.Home.Certificates"
+               @onclick="(() => Navigate(NavS.Home.Certificates))">Certificates</a>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="@RD.AdministratorText">
+        <Authorized>
+            <a class="headerlink">CRM</a>
+            <a class="headerlink">Bid Master</a>
+            <a class="headerlink">Cost Control</a>
+            <a class="headerlink">Projects</a>
+            <a class="headerlink">To-Do</a>
+        </Authorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="@RD.AdministratorText">
+        <Authorized>
+            <a class="headerlink @Dict[NavS.Home.UserManager]" href="@NavS.Home.UserManager"
+               @onclick="(() => Navigate(NavS.Home.UserManager))">Users</a>
+        </Authorized>
+    </AuthorizeView>
+    
+    <AuthorizeView Roles="@RD.AdministratorText">
+        <Authorized>
+            <a class="headerlink">Errors</a>
+        </Authorized>
+    </AuthorizeView>
+ 
+</div>

@@ -1,0 +1,17 @@
+﻿@using APU.WebApp.Services.Navigation
+
+@code {
+
+    [Inject]
+    public NavigationManager NavM { get; set; }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            NavM.NavigateTo(NavS.Index);
+        }
+
+        base.OnAfterRender(firstRender);
+    }
+}

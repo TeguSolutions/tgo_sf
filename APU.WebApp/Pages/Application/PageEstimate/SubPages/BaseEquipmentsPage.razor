@@ -1,0 +1,116 @@
+﻿@layout AppLayout
+@inherits BaseEquipmentsPageVM
+@page "/estimates/equipments"
+
+<PageTitle>Estimates - Equipments | TechGroupOne</PageTitle>
+
+<div id="equipments-container" class="equipments-container">
+    
+    <DlgConfirmation @ref="@(ConfirmationDialogEquipment)" T="BaseEquipment" Target="equipments-container" HeaderText="Delete Confirmation" Width="350px" />
+    
+    <DlgEquipmentManager @ref="@EquipmentManager" Target="equipments-container"/>
+
+    <div class="equipments-content">
+        
+        <div class="d-flex mb-2">
+
+            <SfTextBox CssClass="me-1" Width="250px" Placeholder="Search" ShowClearButton="true"
+                       Input="@TbFilterInputChanged" @onkeypress="@TbFilterKeyPressed" />
+            <SfButton IconCss="e-icons e-icon-search" CssClass="me-3" IsPrimary="true" OnClick="@GetFilteredItems"/>
+
+            <SfButton IconCss="e-icons e-icon-export-excel" CssClass="me-3 w-60px" OnClick="@ExportAsExcel"/>
+
+            <SfButton IconCss="e-icons e-icon-plus" CssClass="e-success w-60px" OnClick="@EquipmentManagerOpen"/>
+
+        </div>
+        
+        <div class="equipments-grid-container">
+            <SfGrid @ref="@(Grid)" ID="GridEquipment" Height="100%" Width="100%" DataSource="@FilteredEquipments"
+                    AllowPaging="true" AllowTextWrap="true" AllowSorting="true" AllowResizing="false"
+                    AllowExcelExport="true" AllowPdfExport="true">
+                
+                <GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"/>
+                <GridTextWrapSettings WrapMode="WrapMode.Content"/>
+                <GridEvents TValue="BaseEquipment" CommandClicked="@DataGridCommandClick" OnActionBegin="@DataGridOnActionBegin" />
+                <GridPageSettings PageSize="20" PageSizes="@SyncfusionHelper.GridPageSizes" />
+
+                <GridColumns>
+                    <GridColumn Field="@nameof(BaseEquipment.Id)" IsPrimaryKey="true" Width="0" Visible="false"/>
+                    
+                    <GridColumn HeaderText="Manage" Width="120" TextAlign="SfGridTextAlign.Center">
+                        <GridCommandColumns>
+                            <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-edit", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-delete", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Save" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-save", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Cancel" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-cancel-icon", CssClass = "e-flat" })"/>
+                        </GridCommandColumns>
+                    </GridColumn>
+                    
+                    <GridColumn Field="@nameof(BaseEquipment.Description)" HeaderText="Description" HeaderTextAlign="SfGridTextAlign.Center" Width="400">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((BaseEquipment)context).Description)" Multiline="true"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BaseEquipment.Unit)" HeaderText="Unit" HeaderTextAlign="SfGridTextAlign.Center" Width="100">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((BaseEquipment)context).Unit)"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BaseEquipment.Quantity)" HeaderText="Qty" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="90" Format="n">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseEquipment)context).Quantity)" Placeholder="Qty" Min="0" Format="n" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BaseEquipment.Price)" HeaderText="Price" HeaderTextAlign="@SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="130">
+                        <Template>
+                            <span>@(((BaseEquipment)context).Price.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseEquipment)context).Price)" Placeholder="Price" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BaseEquipment.Vendor)" HeaderText="Vendor" HeaderTextAlign="@SfGridTextAlign.Center" Width="200">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((BaseEquipment)context).Vendor)"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BaseEquipment.Phone)" HeaderText="Phone" HeaderTextAlign="@SfGridTextAlign.Center" Width="140">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((BaseEquipment)context).Phone)"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BaseEquipment.Link)" HeaderText="Link" HeaderTextAlign="@SfGridTextAlign.Center" Width="200">
+                        <Template>
+                            @{
+                                var link = ((BaseEquipment)context).Link;
+                                if (!string.IsNullOrWhiteSpace(link))
+                                {
+                                    <SfTooltip Content="@link">
+                                        <div class="d-flex w-100" @onclick="@(() => JS.OpenUrlInNewTab(link))">
+                                            <a style="margin-inline: auto;" href="@link" target="_blank" @onclick:preventDefault>Link</a>
+                                        </div>
+                                    </SfTooltip>
+                                }
+                            }
+                        </Template>
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((BaseEquipment)context).Link)" Multiline="true"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BaseEquipment.LastUpdatedAt)" HeaderText="Date" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center" Width="130" Type="@ColumnType.Date" Format="d" AllowEditing="false"/>
+                    <GridColumn Field="@(nameof(BaseEquipment.LastUpdatedBy) + "." + nameof(User.Monogram))" HeaderText="User" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center" Width="100" AllowEditing="false"/>
+
+                </GridColumns>
+            </SfGrid>
+        </div>
+
+    </div>
+
+</div>

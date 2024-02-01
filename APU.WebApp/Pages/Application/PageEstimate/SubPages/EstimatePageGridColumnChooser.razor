@@ -1,0 +1,335 @@
+﻿@inherits EstimatePageGridColumnChooserVM
+
+<div class="estimate-grid-columnchooser-popup @PopupCss">
+    
+    @if (EGrid is not null)
+    {
+        <div style="width: 120px;" class="d-flex flex-column m-1">
+            <p style="font-weight: 500; text-decoration: underline;" class="text-center mb-2">Common</p>
+            
+            @{
+                var group_id = EGrid.Columns.First(c => c.Field == nameof(Apu.GroupId));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-group_id" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(group_id.Visible)" @oninput="@(() => CheckedChanged(group_id))" />
+                    <label for="gcc-group_id" class="my-auto csr-ptr">@(group_id.HeaderText)</label>
+                </div>
+            }
+            @{
+                var item_id = EGrid.Columns.First(c => c.Field == nameof(Apu.ItemId));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-id" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(item_id.Visible)" @oninput="@(() => CheckedChanged(item_id))"/>
+                    <label for="gcc-id" class="my-auto csr-ptr">@(item_id.HeaderText)</label>
+                </div>
+            }
+            
+            @{
+                var code = EGrid.Columns.First(c => c.Field == nameof(Apu.Code));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-code" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(code.Visible)" @oninput="@(() => CheckedChanged(code))"/>
+                    <label for="gcc-code" class="my-auto csr-ptr">@(code.HeaderText)</label>
+                </div>
+            }
+            @{
+                var block = EGrid.Columns.First(c => c.Field == nameof(Apu.IsBlocked));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-block" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(block.Visible)" @oninput="@(() => CheckedChanged(block))"/>
+                    <label for="gcc-block" class="my-auto csr-ptr">@(block.HeaderText)</label>
+                </div>
+            }
+            @{
+                var status_id = EGrid.Columns.First(c => c.Field == nameof(Apu.Status));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-status_id" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(status_id.Visible)" @oninput="@(() => CheckedChanged(status_id))"/>
+                    <label for="gcc-status_id" class="my-auto csr-ptr">@(status_id.HeaderText)</label>
+                </div>
+            }
+
+            @{
+                var description = EGrid.Columns.First(c => c.Field == nameof(Apu.Description));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-description" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(description.Visible)" @oninput="@(() => CheckedChanged(description))"/>
+                    <label for="gcc-description" class="my-auto csr-ptr">@(description.HeaderText)</label>
+                </div>
+            }
+
+            @{
+                var unit = EGrid.Columns.First(c => c.Field == nameof(Apu.Unit));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit.Visible)" @oninput="@(() => CheckedChanged(unit))"/>
+                    <label for="gcc-unit" class="my-auto csr-ptr">@(unit.HeaderText)</label>
+                </div>
+            }
+            @{
+                var qty = EGrid.Columns.First(c => c.Field == nameof(Apu.Quantity));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-qty" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(qty.Visible)" @oninput="@(() => CheckedChanged(qty))"/>
+                    <label for="gcc-qty" class="my-auto csr-ptr">@(qty.HeaderText)</label>
+                </div>
+            }
+
+            @{
+                var gross = EGrid.Columns.First(c => c.Field == nameof(Apu.Sum) + "." + nameof(Apu.Sum.GrossTotalPct));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-gross" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(gross.Visible)" @oninput="@(() => CheckedChanged(gross))"/>
+                    <label for="gcc-gross" class="my-auto csr-ptr">@(gross.HeaderText)</label>
+                </div>
+            }
+
+            @{
+                var date = EGrid.Columns.First(c => c.Field == nameof(Apu.LastUpdatedAt));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-date" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(date.Visible)" @oninput="@(() => CheckedChanged(date))"/>
+                    <label for="gcc-date" class="my-auto csr-ptr">@(date.HeaderText)</label>
+                </div>
+            }
+            @{
+                var user = EGrid.Columns.First(c => c.Field == nameof(Apu.LastUpdatedBy) + "." + nameof(User.Monogram));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-user" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(user.Visible)" @oninput="@(() => CheckedChanged(user))"/>
+                    <label for="gcc-user" class="my-auto csr-ptr">@(user.HeaderText)</label>
+                </div>
+            }
+        </div>
+
+        <div style="width: 170px;" class="d-flex flex-column m-1">
+
+            <p style="font-weight: 500; text-decoration: underline;" class="text-center mb-2">Prices</p>
+
+            @{
+                var unit_labor = EGrid.Columns.First(c => c.Field == nameof(Apu.LaborSum) + "." + nameof(Apu.LaborSum.Total));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_labor" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_labor.Visible)" @oninput="@(() => CheckedChanged(unit_labor))"/>
+                    <label for="gcc-unit_labor" class="my-auto csr-ptr">@(unit_labor.HeaderText)</label>
+                </div>
+            }
+            @{
+                var total_labor_total = EGrid.Columns.First(c => c.Field == nameof(Apu.LaborSum) + "." + nameof(Apu.LaborSum.TotalExtend));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-total_labor_total" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(total_labor_total.Visible)" @oninput="@(() => CheckedChanged(total_labor_total))"/>
+                    <label for="gcc-total_labor_total" class="my-auto csr-ptr">@(total_labor_total.HeaderText)</label>
+                </div>
+            }
+            
+            @{
+                var unit_material = EGrid.Columns.First(c => c.Field == nameof(Apu.MaterialSum) + "." + nameof(Apu.MaterialSum.Total));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_material" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_material.Visible)" @oninput="@(() => CheckedChanged(unit_material))"/>
+                    <label for="gcc-unit_material" class="my-auto csr-ptr">@(unit_material.HeaderText)</label>
+                </div>
+            }
+            @{
+                var total_material_total = EGrid.Columns.First(c => c.Field == nameof(Apu.MaterialSum) + "." + nameof(Apu.MaterialSum.TotalExtend));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-total_material_total" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(total_material_total.Visible)" @oninput="@(() => CheckedChanged(total_material_total))"/>
+                    <label for="gcc-total_material_total" class="my-auto csr-ptr">@(total_material_total.HeaderText)</label>
+                </div>
+            }
+            
+            @{
+                var unit_equipment = EGrid.Columns.First(c => c.Field == nameof(Apu.EquipmentSum) + "." + nameof(Apu.EquipmentSum.Total));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_equipment" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_equipment.Visible)" @oninput="@(() => CheckedChanged(unit_equipment))"/>
+                    <label for="gcc-unit_equipment" class="my-auto csr-ptr">@(unit_equipment.HeaderText)</label>
+                </div>
+            }
+            @{
+                var total_equipment_total = EGrid.Columns.First(c => c.Field == nameof(Apu.EquipmentSum) + "." + nameof(Apu.EquipmentSum.TotalExtend));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-total_equipment_total" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(total_equipment_total.Visible)" @oninput="@(() => CheckedChanged(total_equipment_total))"/>
+                    <label for="gcc-total_equipment_total" class="my-auto csr-ptr">@(total_equipment_total.HeaderText)</label>
+                </div>
+            }
+            
+            @{
+                var unit_subcontractor = EGrid.Columns.First(c => c.Field == nameof(Apu.ContractSum) + "." + nameof(Apu.ContractSum.Total));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_subcontractor" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_subcontractor.Visible)" @oninput="@(() => CheckedChanged(unit_subcontractor))"/>
+                    <label for="gcc-unit_subcontractor" class="my-auto csr-ptr">@(unit_subcontractor.HeaderText)</label>
+                </div>
+            }
+            @{
+                var total_subcontractor_total = EGrid.Columns.First(c => c.Field == nameof(Apu.ContractSum) + "." + nameof(Apu.ContractSum.TotalExtend));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-total_subcontractor_total" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(total_subcontractor_total.Visible)" @oninput="@(() => CheckedChanged(total_subcontractor_total))"/>
+                    <label for="gcc-total_subcontractor_total" class="my-auto csr-ptr">@(total_subcontractor_total.HeaderText)</label>
+                </div>
+            }
+
+            @{
+                var price = EGrid.Columns.First(c => c.Field == nameof(Apu.Sum) + "." + nameof(Apu.Sum.Total));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-price" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(price.Visible)" @oninput="@(() => CheckedChanged(price))"/>
+                    <label for="gcc-price" class="my-auto csr-ptr">@(price.HeaderText)</label>
+                </div>
+            }
+            @{
+                var total_total = EGrid.Columns.First(c => c.Field == nameof(Apu.Sum) + "." + nameof(Apu.Sum.TotalExtend));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-total_total" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(total_total.Visible)" @oninput="@(() => CheckedChanged(total_total))"/>
+                    <label for="gcc-total_total" class="my-auto csr-ptr">@(total_total.HeaderText)</label>
+                </div>
+            }
+        </div>
+        
+        <div style="width: 170px;" class="d-flex flex-column m-1">
+
+            <p style="font-weight: 500; text-decoration: underline;" class="text-center mb-2">Pro-Rate</p>
+
+            @{
+                var unit_labor_pro_rate = EGrid.Columns.First(c => c.Field == nameof(Apu.LaborSum) + "." + nameof(Apu.LaborSum.TotalProRate));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_labor_pro_rate" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_labor_pro_rate.Visible)" @oninput="@(() => CheckedChanged(unit_labor_pro_rate))"/>
+                    <label for="gcc-unit_labor_pro_rate" class="my-auto csr-ptr">@(unit_labor_pro_rate.HeaderText)</label>
+                </div>
+            }
+            @{
+                var total_labor_pro_rate = EGrid.Columns.First(c => c.Field == nameof(Apu.LaborSum) + "." + nameof(Apu.LaborSum.TotalExtendProRate));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-total_labor_pro_rate" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(total_labor_pro_rate.Visible)" @oninput="@(() => CheckedChanged(total_labor_pro_rate))"/>
+                    <label for="gcc-total_labor_pro_rate" class="my-auto csr-ptr">@(total_labor_pro_rate.HeaderText)</label>
+                </div>
+            }
+
+            @{
+                var unit_material_pro_rate = EGrid.Columns.First(c => c.Field == nameof(Apu.MaterialSum) + "." + nameof(Apu.MaterialSum.TotalProRate));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_material_pro_rate" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_material_pro_rate.Visible)" @oninput="@(() => CheckedChanged(unit_material_pro_rate))"/>
+                    <label for="gcc-unit_material_pro_rate" class="my-auto csr-ptr">@(unit_material_pro_rate.HeaderText)</label>
+                </div>
+            }
+            @{
+                var total_material_pro_rate = EGrid.Columns.First(c => c.Field == nameof(Apu.MaterialSum) + "." + nameof(Apu.MaterialSum.TotalExtendProRate));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-total_material_pro_rate" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(total_material_pro_rate.Visible)" @oninput="@(() => CheckedChanged(total_material_pro_rate))" />
+                    <label for="gcc-total_material_pro_rate" class="my-auto csr-ptr">@(total_material_pro_rate.HeaderText)</label>
+                </div>
+            }
+
+            @{
+                var unit_equipment_pro_rate = EGrid.Columns.First(c => c.Field == nameof(Apu.EquipmentSum) + "." + nameof(Apu.EquipmentSum.TotalProRate));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_equipment_pro_rate" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_equipment_pro_rate.Visible)" @oninput="@(() => CheckedChanged(unit_equipment_pro_rate))" />
+                    <label for="gcc-unit_equipment_pro_rate" class="my-auto csr-ptr">@(unit_equipment_pro_rate.HeaderText)</label>
+                </div>
+            }
+            @{
+                var total_equipment_pro_rate = EGrid.Columns.First(c => c.Field == nameof(Apu.EquipmentSum) + "." + nameof(Apu.EquipmentSum.TotalExtendProRate));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-total_equipment_pro_rate" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(total_equipment_pro_rate.Visible)" @oninput="@(() => CheckedChanged(total_equipment_pro_rate))" />
+                    <label for="gcc-total_equipment_pro_rate" class="my-auto csr-ptr">@(total_equipment_pro_rate.HeaderText)</label>
+                </div>
+            }
+
+            @{
+                var unit_contract_pro_rate = EGrid.Columns.First(c => c.Field == nameof(Apu.ContractSum) + "." + nameof(Apu.ContractSum.TotalProRate));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_contract_pro_rate" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_contract_pro_rate.Visible)" @oninput="@(() => CheckedChanged(unit_contract_pro_rate))" />
+                    <label for="gcc-unit_contract_pro_rate" class="my-auto csr-ptr">@(unit_contract_pro_rate.HeaderText)</label>
+                </div>
+            }
+            @{
+                var total_contract_pro_rate = EGrid.Columns.First(c => c.Field == nameof(Apu.ContractSum) + "." + nameof(Apu.ContractSum.TotalExtendProRate));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-total_contract_pro_rate" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(total_contract_pro_rate.Visible)" @oninput="@(() => CheckedChanged(total_contract_pro_rate))" />
+                    <label for="gcc-total_contract_pro_rate" class="my-auto csr-ptr">@(total_contract_pro_rate.HeaderText)</label>
+                </div>
+            }
+            
+            @{
+                var pro_rate = EGrid.Columns.First(c => c.Field == nameof(Apu.Sum) + "." + nameof(Apu.Sum.TotalProRate));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-pro_rate" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(pro_rate.Visible)" @oninput="@(() => CheckedChanged(pro_rate))" />
+                    <label for="gcc-pro_rate" class="my-auto csr-ptr">@(pro_rate.HeaderText)</label>
+                </div>
+            }
+            @{
+                var total_pro_rate = EGrid.Columns.First(c => c.Field == nameof(Apu.Sum) + "." + nameof(Apu.Sum.TotalExtendProRate));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-total_pro_rate" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(total_pro_rate.Visible)" @oninput="@(() => CheckedChanged(total_pro_rate))" />
+                    <label for="gcc-total_pro_rate" class="my-auto csr-ptr">@(total_pro_rate.HeaderText)</label>
+                </div>
+            }
+        </div>
+        
+        <div style="width: 200px;" class="d-flex flex-column m-1">
+
+            <p style="font-weight: 500; text-decoration: underline;" class="text-center mb-2">Cost</p>
+
+            @{
+                var unit_labor_subtotal = EGrid.Columns.First(c => c.Field == nameof(Apu.LaborSum) + "." + nameof(Apu.LaborSum.SubTotalSuperVision));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_labor_subtotal" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_labor_subtotal.Visible)" @oninput="@(() => CheckedChanged(unit_labor_subtotal))" />
+                    <label for="gcc-unit_labor_subtotal" class="my-auto csr-ptr">@(unit_labor_subtotal.HeaderText)</label>
+                </div>
+            }
+            @{
+                var labor_subtotal = EGrid.Columns.First(c => c.Field == nameof(Apu.LaborSum) + "." + nameof(Apu.LaborSum.SubTotalSuperVisionExtend));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-labor_subtotal" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(labor_subtotal.Visible)" @oninput="@(() => CheckedChanged(labor_subtotal))" />
+                    <label for="gcc-labor_subtotal" class="my-auto csr-ptr">@(labor_subtotal.HeaderText)</label>
+                </div>
+            }
+            
+            @{
+                var unit_material_subtotal = EGrid.Columns.First(c => c.Field == nameof(Apu.MaterialSum) + "." + nameof(Apu.MaterialSum.SubTotalSalesTotal));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_material_subtotal" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_material_subtotal.Visible)" @oninput="@(() => CheckedChanged(unit_material_subtotal))" />
+                    <label for="gcc-unit_material_subtotal" class="my-auto csr-ptr">@(unit_material_subtotal.HeaderText)</label>
+                </div>
+            }
+            @{
+                var material_subtotal = EGrid.Columns.First(c => c.Field == nameof(Apu.MaterialSum) + "." + nameof(Apu.MaterialSum.SubTotalSalesTotalExtend));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-material_subtotal" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(material_subtotal.Visible)" @oninput="@(() => CheckedChanged(material_subtotal))" />
+                    <label for="gcc-material_subtotal" class="my-auto csr-ptr">@(material_subtotal.HeaderText)</label>
+                </div>
+            }
+            
+            @{
+                var unit_equipment_subtotal = EGrid.Columns.First(c => c.Field == nameof(Apu.EquipmentSum) + "." + nameof(Apu.EquipmentSum.SubTotal));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_equipment_subtotal" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_equipment_subtotal.Visible)" @oninput="@(() => CheckedChanged(unit_equipment_subtotal))" />
+                    <label for="gcc-unit_equipment_subtotal" class="my-auto csr-ptr">@(unit_equipment_subtotal.HeaderText)</label>
+                </div>
+            }
+            @{
+                var equipment_subtotal = EGrid.Columns.First(c => c.Field == nameof(Apu.EquipmentSum) + "." + nameof(Apu.EquipmentSum.SubTotalExtend));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-equipment_subtotal" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(equipment_subtotal.Visible)" @oninput="@(() => CheckedChanged(equipment_subtotal))" />
+                    <label for="gcc-equipment_subtotal" class="my-auto csr-ptr">@(equipment_subtotal.HeaderText)</label>
+                </div>
+            }
+            
+            @{
+                var unit_subcontractor_subtotal = EGrid.Columns.First(c => c.Field == nameof(Apu.ContractSum) + "." + nameof(Apu.ContractSum.SubTotal));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_subcontractor_subtotal" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_subcontractor_subtotal.Visible)" @oninput="@(() => CheckedChanged(unit_subcontractor_subtotal))" />
+                    <label for="gcc-unit_subcontractor_subtotal" class="my-auto csr-ptr">@(unit_subcontractor_subtotal.HeaderText)</label>
+                </div>
+            }
+            @{
+                var subcontractor_subtotal = EGrid.Columns.First(c => c.Field == nameof(Apu.ContractSum) + "." + nameof(Apu.ContractSum.SubTotalExtend));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-subcontractor_subtotal" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(subcontractor_subtotal.Visible)" @oninput="@(() => CheckedChanged(subcontractor_subtotal))" />
+                    <label for="gcc-subcontractor_subtotal" class="my-auto csr-ptr">@(subcontractor_subtotal.HeaderText)</label>
+                </div>
+            }
+            
+            @{
+                var unit_cost = EGrid.Columns.First(c => c.Field == nameof(Apu.Sum) + "." + nameof(Apu.Sum.SubTotal));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-unit_cost" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(unit_cost.Visible)" @oninput="@(() => CheckedChanged(unit_cost))" />
+                    <label for="gcc-unit_cost" class="my-auto csr-ptr">@(unit_cost.HeaderText)</label>
+                </div>
+            }
+            @{
+                var subtotal_total = EGrid.Columns.First(c => c.Field == nameof(Apu.Sum) + "." + nameof(Apu.Sum.SubTotalExtend));
+                <div class="mb-1 d-flex" style="font: 14px inter;">
+                    <input id="gcc-subtotal_total" class="my-auto csr-ptr" style="width: 16px; height: 16px; margin-right: 12px;" type="checkbox" checked="@(subtotal_total.Visible)" @oninput="@(() => CheckedChanged(subtotal_total))" />
+                    <label for="gcc-subtotal_total" class="my-auto csr-ptr">@(subtotal_total.HeaderText)</label>
+                </div>
+            }
+        </div>
+    }
+
+</div>

@@ -1,0 +1,17 @@
+﻿@namespace Tegu.Blazor.Controls
+@typeparam T
+@inherits DataGridRowCellVM<T>
+
+<div id="@Id" class="grid-rowcell @Column.TextAlign.Name" 
+     style="@WidthStyle; min-height: @DataGrid.RowHeight;">
+
+    @if (Column.Template is null)
+    {
+        <span class="grid-rowcell-span">@Value</span>
+    }
+    else
+    {
+        @Column.Template(Row.Item)
+    }
+
+</div>

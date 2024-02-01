@@ -1,0 +1,25 @@
+﻿@layout AppLayout
+@page "/dev/tools"
+@inherits DevToolsPageVM
+
+<PageTitle>Dev Tools</PageTitle>
+
+<div class="d-flex flex-column">
+    
+    <div class="d-flex">
+        <SfComboBox @ref="@SfCbProjectFilter" TValue="Guid?" TItem="ProjectModel" CssClass="me-2" Width="350px" Placeholder="Select a Project"
+                    AllowFiltering="true"
+                    DataSource="@FilteredProjectModels" Value="@SelectedProjectId">
+            <ComboBoxFieldSettings Value="@nameof(ProjectModel.Id)" Text="@nameof(ProjectModel.ProjectName)" />
+            <ComboBoxEvents TValue="Guid?" TItem="ProjectModel" Filtering="ProjectFilterChanged" ValueChange="@SelectedProjectCBChanged" />
+        </SfComboBox>
+
+        <SfButton CssClass="me-2" Content="Serialize" @onclick="@LoadAndSerializeProject" />
+   
+        <InputFile OnChange="@Import" />
+    </div>
+    
+    <SfTextBox Multiline="true" Value="@SerializedProject" />
+
+
+</div>

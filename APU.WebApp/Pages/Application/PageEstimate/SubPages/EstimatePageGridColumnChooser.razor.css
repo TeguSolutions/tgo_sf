@@ -1,0 +1,36 @@
+﻿.estimate-grid-columnchooser-popup {
+    position: absolute;
+    top: 43px;
+    right: 5px;
+    padding: 5px;
+
+    display: flex;
+
+    min-width: 100px;
+    min-height: 100px;
+
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 5px;
+
+    z-index: 999;
+
+    opacity: 0;
+    visibility: collapse;
+/*    transition: opacity 0.1s ease-in;*/
+}
+
+.estimate-grid-columnchooser-popup-show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/*.table-p0 {
+
+}
+.table-p0 tbody tr td {
+    padding: 0 !important;
+    min-width: 44px;
+}
+
+*/

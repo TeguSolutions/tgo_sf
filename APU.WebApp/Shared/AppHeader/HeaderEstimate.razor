@@ -1,0 +1,43 @@
+﻿ @inherits HeaderEstimateVM
+
+<div class="d-flex flex-wrap">
+
+    <a class="headerlink @Dict[NavS.Estimates.Base]" href="@NavS.Index" 
+    @onclick="(() => NavM.NavigateTo(NavS.Index))">Home</a>
+
+    <AuthorizeView Roles="@($"{RD.AdministratorText},{RD.EstimatorText},{RD.SupervisorText}")">
+        <Authorized>
+            <a class="headerlink @Dict[NavS.Estimates.Bids]" href="@NavS.Estimates.Bids" 
+                @onclick="(() => Navigate(NavS.Estimates.Bids))">Bids</a>
+            <a class="headerlink @Dict[NavS.Estimates.Estimate]" href="@NavS.Estimates.Estimate"
+                @onclick="(() => Navigate(NavS.Estimates.Estimate))">Estimate</a>
+            <a class="headerlink @Dict[NavS.Estimates.APU]" href="@NavS.Estimates.APU"
+                @onclick="(() => Navigate(NavS.Estimates.APU))">APU</a>
+            <a class="headerlink @Dict[NavS.Estimates.Items]" href="@NavS.Estimates.Items"
+                @onclick="(() => Navigate(NavS.Estimates.Items))">Items</a>
+            <a class="headerlink @Dict[NavS.Estimates.Performance]" href="@NavS.Estimates.Performance"
+                @onclick="(() => Navigate(NavS.Estimates.Performance))">Performance</a>
+            <a class="headerlink @Dict[NavS.Estimates.Labor]" href="@NavS.Estimates.Labor"
+                @onclick="(() => Navigate(NavS.Estimates.Labor))">Labor</a>
+            <a class="headerlink @Dict[NavS.Estimates.Materials]" href="@NavS.Estimates.Materials"
+                @onclick="(() => Navigate(NavS.Estimates.Materials))">Materials</a>
+            <a class="headerlink @Dict[NavS.Estimates.Equipments]" href="@NavS.Estimates.Equipments"
+                @onclick="(() => Navigate(NavS.Estimates.Equipments))">Equipments</a>
+            <a class="headerlink @Dict[NavS.Estimates.Contracts]" href="@NavS.Estimates.Contracts"
+                @onclick="(() => Navigate(NavS.Estimates.Contracts))">Contracts</a>
+            <a class="headerlink @Dict[NavS.Estimates.Defaults]" href="@NavS.Estimates.Defaults"
+                @onclick="(() => Navigate(NavS.Estimates.Defaults))">Defaults</a>
+            
+            <a class="headerlink @Dict[NavS.Estimates.Vendors]" href="@NavS.Estimates.Vendors"
+               @onclick="(() => Navigate(NavS.Estimates.Vendors))">Vendors</a>
+            
+            <a class="headerlink @Dict[NavS.Estimates.Definitions]" href="@NavS.Estimates.Definitions"
+               @onclick="(() => Navigate(NavS.Estimates.Definitions))">Definitions</a>
+               
+            <a class="headerlink @Dict[NavS.Estimates.Schedule]" href="@NavS.Estimates.Schedule"
+               @onclick="(() => Navigate(NavS.Estimates.Schedule))">Schedule</a>
+
+        </Authorized>
+    </AuthorizeView>
+
+</div>

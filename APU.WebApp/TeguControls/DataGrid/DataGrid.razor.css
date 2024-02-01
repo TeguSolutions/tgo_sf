@@ -1,0 +1,15 @@
+.grid {
+    border: 1px solid var(--ts-clr-224);
+/*    overflow: hidden*/
+}
+
+.grid-column-definitions {
+    width: 0;
+    height: 0;
+    position: absolute;
+    visibility: collapse;
+}
+
+.grid-items {
+    overflow-y: auto;
+}

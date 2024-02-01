@@ -1,0 +1,65 @@
+﻿@using System.Globalization
+@using System.Net.Http
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+
+@* WebApp *@
+@using APU.WebApp
+
+@using APU.WebApp.Pages.Application.Management.Dialogs;
+
+@using APU.WebApp.Pages.Application.PageEstimate.SubPages.APUComponents
+@using APU.WebApp.Pages.Application.PageEstimate.SubPages.HelperComponents
+@using APU.WebApp.Pages.Application.PageEstimate.SubPages.SharedComponents
+
+@using APU.WebApp.Services.Navigation
+
+@using APU.WebApp.Shared
+@using APU.WebApp.Shared.AppHeader
+@using APU.WebApp.Shared.Dialogs
+@using APU.WebApp.Shared.NavigationHelpers
+@using APU.WebApp.Shared.Layouts
+
+@using APU.WebApp.Utils
+@using APU.WebApp.Utils.Extensions
+
+@* Data *@
+@using APU.DataV2.Definitions
+@using APU.DataV2.Entities
+@using APU.DataV2.EntityModels
+
+@using Microsoft.AspNetCore.Components.QuickGrid
+
+@using ItemType = APU.DataV2.Entities.ItemType;
+
+@* Syncfusion *@
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Gantt
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Lists
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Notifications
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.ProgressBar
+@using Syncfusion.Blazor.Spinner
+@using Syncfusion.Blazor.SplitButtons
+
+@using SfGanttEditMode = Syncfusion.Blazor.Gantt.EditMode
+@using SfGridAction = Syncfusion.Blazor.Grids.Action
+@using SfGridEditMode = Syncfusion.Blazor.Grids.EditMode
+@using SfGridSelectionType = Syncfusion.Blazor.Grids.SelectionType
+@using SfGridTextAlign = Syncfusion.Blazor.Grids.TextAlign
+@using ButtonLabelPosition = Syncfusion.Blazor.Buttons.LabelPosition
+@using SfNavigationItemType = Syncfusion.Blazor.Navigations.ItemType;
+
+@using Tegu.Blazor.Controls
+@using TTA = Tegu.Blazor.Controls.TextAlign

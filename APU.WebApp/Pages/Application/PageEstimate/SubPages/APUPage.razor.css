@@ -1,0 +1,101 @@
+﻿.apu-container {
+    background-image: url(../imgs/bg-estimate.jpg);
+    width: 100vw;
+    height: 100vh;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding: 20px;
+    overflow: auto;
+}
+
+.apu-content {
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tab {
+    width: 1200px;
+    margin-inline: auto;
+    background: #fefefe;
+    box-shadow: 0 0 6px 2px #e8e8e8;
+}
+    .tab tr {
+        height: 26.2px;
+    }
+    .tab th {
+        font-weight: 500;
+        font-size: 0.85rem !important;
+        padding: .15rem .25rem !important;
+        text-align: center;
+    }
+    .tab td {
+        font-weight: 400;
+        font-size: 0.8rem !important;
+        padding: .15rem .25rem !important;
+        vertical-align: middle;
+        text-align: end;
+    }
+
+.tab-block {
+    pointer-events: none;
+    filter: brightness(0.95);
+}
+
+.div-no-btn {
+    display: flex;
+    height: 29px;
+    cursor: pointer;
+    background-color: white;
+    transition: background-color 0.1s ease-in;
+}
+    .div-no-btn:hover {
+        background-color: rgb(230, 230, 230);
+    }
+
+
+.clickable {
+    cursor: pointer;
+    transition: background-color 0.14s ease-in;
+}
+    .clickable:hover {
+        background-color: gray;
+        background-color: #CCFFFF;
+    }
+
+
+.apu-item-description {
+    margin: 0 !important;
+    padding: 2px 5px;
+
+    display: inline-flex;
+    align-items: center;
+
+    width: 100% !important;
+    min-height: 30px;
+
+    user-select: text !important;
+    pointer-events: all !important;
+
+    cursor: text;
+    text-align: left;
+}
+
+.apu-item-note {
+    margin: 0 !important;
+    padding: 3px 6px;
+
+    display: inline-block;
+    white-space: pre-line;
+
+    user-select: text !important;
+    pointer-events: all !important;
+
+    cursor: text;
+    text-align: left;
+}
+
+

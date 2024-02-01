@@ -1,0 +1,58 @@
+﻿@inherits DlgPerformanceManagerVM
+
+<SfDialog @bind-Visible="@IsVisible" IsModal="true" Width="400px" Target="@Target" CloseOnEscape="false">
+
+    <DialogTemplates>
+        <Header>
+            <span>@Mode.Header Performance</span>
+        </Header>
+        <Content>
+            
+            <EditForm @ref="@Form" Model="@Performance">
+                <DataAnnotationsValidator />
+
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Description:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Performance.Description" Placeholder="Description" Multiline="true"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Performance.Description)"/>
+                        </div>
+                    </div>
+                </div>
+
+            
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Performance:</span>
+                    <div class="w-100">
+                        <SfNumericTextBox TValue="decimal" @bind-Value="@Performance.Value" Format="0.00" ShowSpinButton="false"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Performance.Value)"/>
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="d-flex">
+                    <span class="me-2 mt-4px wmm-95px text-end">Hours:</span>
+                    <div class="w-100">
+                        <SfNumericTextBox TValue="decimal" @bind-Value="@Performance.Hours" Min="0" Format="0.0000" ShowSpinButton="false"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Performance.Hours)"/>
+                        </div>
+                    </div>
+                </div>
+
+            </EditForm>
+            
+            <div class="d-flex justify-content-end mt-2">
+                <SfButton Content="Cancel" OnClick="@DialogCancel"/>
+                @foreach(var (button, mode) in Mode.Buttons)
+                {
+                    <SfButton CssClass="ms-2" Content="@button" @onclick="@(() => DialogSubmit(mode))"/>
+                }
+            </div>
+
+        </Content>
+    </DialogTemplates>
+
+</SfDialog>

@@ -1,0 +1,75 @@
+﻿@layout AppLayout
+@inherits BasePerformancePageVM
+@page "/estimates/performance"
+
+<PageTitle>Estimates - Performance | TechGroupOne</PageTitle>
+
+<div id="performance-container" class="performance-container">
+
+    <DlgConfirmation @ref="@(ConfirmationDialogPerformance)" T="BasePerformance" Target="performance-container" HeaderText="Delete Confirmation" Width="350px" />
+    <DlgPerformanceManager @ref="@PerformanceManager" Target="performance-container"/>
+
+    <div class="performance-content">
+        
+        <div class="d-flex mb-2">
+
+            <SfTextBox CssClass="me-1" Width="250px" Placeholder="Search" ShowClearButton="true"
+                       Input="@TbFilterInputChanged" @onkeypress="@TbFilterKeyPressed" />
+            <SfButton IconCss="e-icons e-icon-search" CssClass="" IsPrimary="true" OnClick="@GetFilteredItems"/>
+
+            <SfButton IconCss="e-icons e-icon-export-excel" CssClass="me-3 w-60px" OnClick="@ExportAsExcel"/>
+
+            <SfButton IconCss="e-icons e-icon-plus" CssClass="e-success w-60px" OnClick="@(PerformanceManagerOpen)"/>
+
+        </div>
+
+        <div class="performance-grid-container">
+            <SfGrid @ref="@Grid" ID="GridPerformance" Width="100%" Height="100%" DataSource="@FilteredPerformances"
+                    AllowPaging="true" AllowTextWrap="true" AllowSorting="true" AllowResizing="false"
+                    AllowExcelExport="true" AllowPdfExport="true">
+                
+                <GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="true"/>
+                <GridTextWrapSettings WrapMode="WrapMode.Content"/>
+                <GridEvents TValue="BasePerformance" CommandClicked="@DataGridCommandClick" OnActionBegin="@DataGridOnActionBegin" />
+                <GridPageSettings PageSize="12" PageSizes="@SyncfusionHelper.GridPageSizes" />
+
+                <GridColumns>
+                    <GridColumn Field="@nameof(BasePerformance.Id)" IsPrimaryKey="true" Width="0" Visible="false"/>
+                    
+                    <GridColumn HeaderText="Manage" TextAlign="SfGridTextAlign.Center" Width="120">
+                        <GridCommandColumns>
+                            <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-edit", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-delete", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Save" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-save", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Cancel" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-cancel-icon", CssClass = "e-flat" })"/>
+                        </GridCommandColumns>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BasePerformance.Description)" HeaderText="Description" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Left">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((BasePerformance)context).Description)" Multiline="true"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BasePerformance.Value)" HeaderText="Perf" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Left" Width="100" EditType="EditType.NumericEdit" Format="0.00">
+                        <EditTemplate>
+                            <SfNumericTextBox @bind-Value="@(((BasePerformance)context).Value)" Format="0.00" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BasePerformance.Hours)" HeaderText="Hours" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Left" Width="90" Format="0.0000">
+                        <EditTemplate>
+                            <SfNumericTextBox @bind-Value="@(((BasePerformance)context).Hours)" Min="0" Format="0.0000" Decimals="4" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    
+                    <GridColumn Field="@nameof(BasePerformance.LastUpdatedAt)" HeaderText="Date" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center" Width="130" Type="@ColumnType.Date" Format="d" AllowEditing="false"/>
+                    <GridColumn Field="@(nameof(BasePerformance.LastUpdatedBy) + "." + nameof(User.Monogram))" HeaderText="User" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center" Width="100" AllowEditing="false"/>
+
+                </GridColumns>
+            </SfGrid>
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,28 @@
+﻿.definitions-container {
+    background-image: url(../imgs/bg-estimate.jpg);
+    width: 100vw;
+    height: calc(100vh - 50px);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding: 20px;
+}
+
+.definitions-content {
+    display: flex;
+    flex-wrap: wrap;
+    /*   max-width: 1400px;*/
+    height: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.definitions-form-container {
+    padding: 10px;
+    border: 1px solid rgb(188, 188, 188);
+    border-radius: 4px;
+    background-color: rgba(240, 243, 248, 0.5);
+    max-height: 100%;
+    width: 350px;
+    overflow-y: hidden;
+}

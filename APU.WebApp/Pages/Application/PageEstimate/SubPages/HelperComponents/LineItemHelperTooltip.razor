@@ -1,0 +1,25 @@
+﻿<SfTooltip Target="#tt_estimatehelper" OpensOn="Click" Width="870" Position="@Position.RightCenter" CssClass="sf-tt-lineitemhelper">
+    <div id="tt_estimatehelper" style="" class="lineitemhelper-btn e-icons e-icon-question me-1"/>
+
+    <TooltipTemplates>
+        <Content>
+            <div class="lineitemhelper-tt-content">
+                <p><span>XXX-(-2)</span> Record will place a white lane before any top sub total in a group that could have a Description</p>
+                <p><span>XXX-(-1)</span> Record will place a white lane before any group that could have a Description and will have a Group Sub-Totals</p>
+                <p><span>XXX-00</span> Record will place a white lane before any group that could have a Description only</p>
+                <p><span>XXX-001 to XXX-999</span> These Records will be items records with all their data</p>
+                <p><span>XXX-1000</span> Record will place a white lane after a group that could have a Description only</p>
+                <p><span>XXX-1001</span> Record will place a white lane after a group that could have a Description and will have a Sub-Totals</p>
+                <p><span>XXX-1002</span> Record will place a white lane after bottom sub-total that could have a Description</p>
+                <p><span>998-1003</span> This Line will have total for the project before allowance and Pro_Rate</p>
+                <p><span>999-XXX</span> All the records in this group will be allowances and wont have APU</p>
+                <p><span>999-1003</span> This Line will have total for the project, including allowance</p>
+                <p><span>1000-001 to 999</span> These records on this group will be prorated between all recors for the groups 001 to 998</p>
+                <p><span>1000-1003</span> This Line will have Grand Total for the project, including allowance and Pro_Rate but NOT Payment and performance.</p>
+                <p><span>1000-1004</span> This Line will have Payment & Performance Bond for the project</p>
+                <p><span>1000-1005</span> This Line will have Gross Profit for the project</p>
+                <p><span>1000-1006</span> This Line will have Grand Total for the project, including Payment & Performance Bond</p>
+            </div>
+        </Content>
+    </TooltipTemplates>
+</SfTooltip>

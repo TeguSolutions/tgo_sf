@@ -1,0 +1,239 @@
+﻿@inherits DlgVendorRegistrationVM
+
+<style>
+    .pretag {
+        margin-block: auto;
+        margin-right: 6px;
+        text-align: end;
+        font-size: 12px;
+        font-weight: 500;
+        min-width: 65px;
+        width: 65px;
+        max-width: 65px;
+    }
+</style>
+
+<SfDialog @bind-Visible="@IsVisible" IsModal="true" Width="400px" Target="@Target" CloseOnEscape="false">
+
+    <DialogTemplates>
+        <Header>
+            <span>Vendor Registration</span>
+        </Header>
+
+        <Content>
+            <EditForm Model="@FormClass" OnValidSubmit="@ValidSubmit">
+                <DataAnnotationsValidator />
+                
+                <div class="d-flex mb-1">
+                    <p class="pretag">Company:</p>
+                    <div class="d-flex flex-column w-100">
+                        <SfTextBox @bind-Value="@FormClass.CompanyName" Placeholder="Required"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.CompanyName)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <p class="pretag">Type:</p>
+                    <SfDropDownList CssClass="@("")" TValue="VendorType" TItem="VendorType"
+                                    DataSource="@VendorTypes" @bind-Value="@FormClass.Type"
+                                    AllowFiltering="false">
+                        <DropDownListFieldSettings Value="@nameof(VendorType.Id)" Text="@nameof(VendorType.Name)" />
+                    </SfDropDownList>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <p class="pretag">Trade:</p>
+                    <SfDropDownList CssClass="@("")" TValue="Trade" TItem="Trade"
+                                    DataSource="@Trades" @bind-Value="@FormClass.Trade"
+                                    AllowFiltering="false">
+                        <DropDownListFieldSettings Value="@nameof(Trade.Id)" Text="@nameof(Trade.Name)" />
+                    </SfDropDownList>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <p class="pretag">County:</p>
+                    <SfDropDownList CssClass="@("")" TValue="County" TItem="County"
+                                    DataSource="@Counties" @bind-Value="@FormClass.County"
+                                    AllowFiltering="false">
+                        <DropDownListFieldSettings Value="@nameof(County.Id)" Text="@nameof(County.Name)" />
+                    </SfDropDownList>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <p class="pretag">Address:</p>
+                    <SfTextBox @bind-Value="@FormClass.Address" />
+                </div>
+
+                <div class="d-flex mb-1">
+                    <p class="pretag">Contact:</p>
+                    <SfTextBox @bind-Value="@FormClass.ContactPerson"/>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <p class="pretag">Phone:</p>
+                    <SfTextBox @bind-Value="@FormClass.Phone"/>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <p class="pretag">CEL:</p>
+                    <SfTextBox @bind-Value="@FormClass.CEL"/>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <p class="pretag">Email:</p>
+                    <div class="d-flex flex-column w-100">
+                        <SfTextBox @bind-Value="@FormClass.Email" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Email)" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="d-flex mb-1">
+                    <p class="pretag">Email2:</p>
+                    <div class="d-flex flex-column w-100">
+                        <SfTextBox @bind-Value="@FormClass.Email2"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Email2)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <p class="pretag">Url:</p>
+                    <SfTextBox @bind-Value="@FormClass.Url"/>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <p class="pretag">Comments:</p>
+                    <SfTextBox @bind-Value="@FormClass.Comments" Multiline="true" />
+                </div>
+
+                @*                 <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <p class="mb-1 fs-12px fw-500">Type</p>
+                        <SfDropDownList CssClass="@("")" TValue="VendorType" TItem="VendorType" 
+                                        DataSource="@VendorTypes" @bind-Value="@FormClass.Type"
+                                        AllowFiltering="false">
+                            <DropDownListFieldSettings Value="@nameof(VendorType.Id)" Text="@nameof(VendorType.Name)" />
+                        </SfDropDownList>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.CompanyName" Placeholder="Name" FloatLabelType="@FloatLabelType.Auto" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.CompanyName)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <p class="mb-1 fs-12px fw-500">Trade</p>
+                        <SfDropDownList CssClass="@("")" TValue="Trade" TItem="Trade"
+                                        DataSource="@Trades" @bind-Value="@FormClass.Trade"
+                                        AllowFiltering="false">
+                            <DropDownListFieldSettings Value="@nameof(Trade.Id)" Text="@nameof(Trade.Name)" />
+                        </SfDropDownList>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <p class="mb-1 fs-12px fw-500">County</p>
+                        <SfDropDownList CssClass="@("")" TValue="County" TItem="County"
+                                        DataSource="@Counties" @bind-Value="@FormClass.County"
+                                        AllowFiltering="false">
+                            <DropDownListFieldSettings Value="@nameof(County.Id)" Text="@nameof(County.Name)" />
+                        </SfDropDownList>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.Address" Placeholder="Address" FloatLabelType="@FloatLabelType.Auto" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Address)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.ContactPerson" Placeholder="Contact Person" FloatLabelType="@FloatLabelType.Auto" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.ContactPerson)" />
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.Phone" Placeholder="Phone" FloatLabelType="@FloatLabelType.Auto" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Phone)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.CEL" Placeholder="CEL" FloatLabelType="@FloatLabelType.Auto" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.CEL)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.Email" Placeholder="Email" FloatLabelType="@FloatLabelType.Auto" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Email)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.Email2" Placeholder="Email2" FloatLabelType="@FloatLabelType.Auto" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Email2)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.Url" Placeholder="Url" FloatLabelType="@FloatLabelType.Auto" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Url)" />
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@FormClass.Comments" Placeholder="Comments" FloatLabelType="@FloatLabelType.Auto" 
+                                   Multiline="true"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => FormClass.Comments)" />
+                        </div>
+                    </div>
+                </div> *@
+
+                <div class="d-flex justify-content-end mt-2">
+                    <SfButton CssClass="me-2" Content="Cancel" IsPrimary="false" OnClick="@Cancel" />
+                    <SfButton Content="Register" IsPrimary="true" type="submit" />
+                </div>
+
+            </EditForm>
+
+        </Content>
+    </DialogTemplates>
+</SfDialog>

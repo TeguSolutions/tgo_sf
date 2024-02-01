@@ -1,0 +1,163 @@
+﻿@layout AppLayout
+@inherits VendorsVM
+@page "/estimates/vendors"
+
+<PageTitle>Estimate - Vendors | TechGroupOne</PageTitle>
+
+<div id="vendors-container" class="vendors-container">
+    
+    <DlgConfirmation @ref="@DlgConfirmation" T="Vendor" HeaderText="Delete Confirmation" Width="200px" Target="vendors-container" />
+    <DlgVendorRegistration @ref="@DlgVendorRegistration" Target="vendors-container" />
+
+    <div class="vendors-content">
+        
+        <div class="d-flex mb-2">
+            
+            <SfTextBox CssClass="me-1" Width="250px" Placeholder="Search" ShowClearButton="true"
+                       Input="@TbFilterInputChanged" @onkeypress="@TbFilterKeyPressed" />
+            <SfButton IconCss="e-icons e-icon-search" CssClass="me-2" IsPrimary="true" OnClick="@GetFilteredVendors" />
+            
+            <SfMultiSelect CssClass="w-20 me-2" TValue="List<VendorType>" TItem="VendorType" Placeholder="Type" DataSource="@VendorTypes"
+                           Value="@SelectedVendorTypes" Mode="VisualMode.CheckBox">
+                <MultiSelectFieldSettings Text="Name" Value="Id"/>
+                <MultiSelectEvents TValue="List<VendorType>" TItem="VendorType" ValueChange="@VendorTypeChangeHandler" />
+            </SfMultiSelect>
+            
+            <SfMultiSelect CssClass="w-20 me-2" TValue="List<Trade>" TItem="Trade" Placeholder="Trade" DataSource="@Trades"
+                           Value="@SelectedTrades" Mode="VisualMode.CheckBox">
+                <MultiSelectFieldSettings Text="Name" Value="Id"/>
+                <MultiSelectEvents TValue="List<Trade>" TItem="Trade" ValueChange="@TradeChangeHandler" />
+            </SfMultiSelect>
+            
+            <SfMultiSelect CssClass="w-20 me-2" TValue="List<County>" TItem="County" Placeholder="County" DataSource="@Counties"
+                           Value="@SelectedCounties" Mode="VisualMode.CheckBox">
+                <MultiSelectFieldSettings Text="Name" Value="Id"/>
+                <MultiSelectEvents TValue="List<County>" TItem="County" ValueChange="@CountyChangeHandler" />
+            </SfMultiSelect>
+
+            <SfButton CssClass="ms-auto" Content="New Vendor" OnClick="@DlgVendorRegistrationOpen" />
+        </div>
+
+        <div class="usermanager-grid-container">
+            <SfGrid Height="100%" Width="100%" DataSource="@FilteredVendors"
+                    AllowPaging="true" AllowTextWrap="true" AllowSorting="true" AllowResizing="true">
+
+                <GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="true" Mode="@SfGridEditMode.Normal" />
+                <GridTextWrapSettings WrapMode="WrapMode.Content" />
+                <GridEvents TValue="Vendor" CommandClicked="@DataGridCommandClick" OnActionBegin="@DataGridActionBegin" />
+                <GridPageSettings PageSize="20" PageSizes="@SyncfusionHelper.GridPageSizes" />
+
+                <GridColumns>
+                    <GridColumn Field="@nameof(Vendor.Id)" IsPrimaryKey="true" Width="0" Visible="false" />
+
+                    <GridColumn HeaderText="Manage" TextAlign="SfGridTextAlign.Center" Width="110">
+                        <GridCommandColumns>
+                            <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-edit", CssClass = "e-flat" })" />
+                            <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-delete", CssClass = "e-flat" })" />
+                            <GridCommandColumn Type="CommandButtonType.Save" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-save", CssClass = "e-flat" })" />
+                            <GridCommandColumn Type="CommandButtonType.Cancel" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-cancel-icon", CssClass = "e-flat" })" />
+                        </GridCommandColumns>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(Vendor.TypeId)" HeaderText="Type" TextAlign="SfGridTextAlign.Left" HeaderTextAlign="SfGridTextAlign.Center" Width="140">
+                        <Template>
+                            @{
+                                var vendor = (Vendor)context;
+                                <span>@vendor.Type?.Name</span>
+                            }
+                        </Template>
+                        <EditTemplate>
+                            @{
+                                var vendor = (Vendor)context;
+                                <SfDropDownList CssClass="@("")" TValue="Guid?" TItem="VendorType" DataSource="@VendorTypes" AllowFiltering="false"
+                                            Value="@vendor.TypeId">
+                                    <DropDownListFieldSettings Value="@nameof(VendorType.Id)" Text="@nameof(VendorType.Name)"/>
+                                    <DropDownListEvents TValue="Guid?" TItem="VendorType" ValueChange="@((args) => DataGridDropDownVendorTypeOnValueChange(args, vendor))" />
+                                </SfDropDownList>
+                            }
+                        </EditTemplate>
+                    </GridColumn>
+                  
+                    <GridColumn Field="@nameof(Vendor.TradeId)" HeaderText="Trade" TextAlign="SfGridTextAlign.Left" HeaderTextAlign="SfGridTextAlign.Center" Width="140">
+                        <Template>
+                            @{
+                                var vendor = (Vendor)context;
+                                <span>@vendor.Trade?.Name</span>
+                            }
+                        </Template>
+                        <EditTemplate>
+                            @{
+                                var vendor = (Vendor)context;
+                                <SfDropDownList CssClass="@("")" TValue="Guid?" TItem="Trade" DataSource="@Trades" AllowFiltering="false"
+                                                Value="@vendor.TradeId">
+                                    <DropDownListFieldSettings Value="@nameof(Trade.Id)" Text="@nameof(Trade.Name)" />
+                                    <DropDownListEvents TValue="Guid?" TItem="Trade" ValueChange="@((args) => DataGridDropDownTradeOnValueChange(args, vendor))" />
+                                </SfDropDownList>
+                            }
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(Vendor.CompanyName)" HeaderText="Company Name" TextAlign="SfGridTextAlign.Left" HeaderTextAlign="SfGridTextAlign.Center" Width="150" />
+                    
+                    <GridColumn Field="@nameof(Vendor.CountyId)" HeaderText="County" TextAlign="SfGridTextAlign.Left" HeaderTextAlign="SfGridTextAlign.Center" Width="140">
+                        <Template>
+                            @{
+                                var vendor = (Vendor)context;
+                                <span>@vendor.County?.Name</span>
+                            }
+                        </Template>
+                        <EditTemplate>
+                            @{
+                                var vendor = (Vendor)context;
+                                <SfDropDownList CssClass="@("")" TValue="int?" TItem="County" DataSource="@Counties" AllowFiltering="false"
+                                                Value="@vendor.CountyId">
+                                    <DropDownListFieldSettings Value="@nameof(County.Id)" Text="@nameof(County.Name)" />
+                                    <DropDownListEvents TValue="int?" TItem="County" ValueChange="@((args) => DataGridDropDownCountyOnValueChange(args, vendor))" />
+                                </SfDropDownList>
+                            }
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(Vendor.Address)" HeaderText="Address" TextAlign="SfGridTextAlign.Left" HeaderTextAlign="SfGridTextAlign.Center" Width="200" />
+                    <GridColumn Field="@nameof(Vendor.ContactPerson)" HeaderText="Contact Person" TextAlign="SfGridTextAlign.Left" HeaderTextAlign="SfGridTextAlign.Center" Width="200" />
+                    <GridColumn Field="@nameof(Vendor.Phone)" HeaderText="Phone" TextAlign="SfGridTextAlign.Left" HeaderTextAlign="SfGridTextAlign.Center" Width="100" />
+                    <GridColumn Field="@nameof(Vendor.CEL)" HeaderText="CEL" TextAlign="SfGridTextAlign.Left" Width="80" />
+                    <GridColumn Field="@nameof(Vendor.Email)" HeaderText="Email" TextAlign="SfGridTextAlign.Left" Width="130" />
+                    <GridColumn Field="@nameof(Vendor.Email2)" HeaderText="Email2" TextAlign="SfGridTextAlign.Left" Width="130" />
+                    <GridColumn Field="@nameof(Vendor.Url)" HeaderText="Url" TextAlign="SfGridTextAlign.Left" Width="100">
+                        <Template>
+                            @{
+                                var link = ((Vendor)context).Url;
+                                if (!string.IsNullOrWhiteSpace(link))
+                                {
+                                    <SfTooltip Content="@link">
+                                        <div class="d-flex w-100" @onclick="@(() => JS.OpenUrlInNewTab(link))">
+                                            <a style="margin-inline: auto;" href="@link" target="_blank" @onclick:preventDefault>Link</a>
+                                        </div>
+                                    </SfTooltip>
+                                }
+                            }
+                        </Template>
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((Vendor)context).Url)" Multiline="true" />
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(Vendor.Comments)" HeaderText="Comments" TextAlign="SfGridTextAlign.Left" Width="200">
+                        <Template>
+                            @{
+                                var vendor = (Vendor)context;
+                                <span>@vendor.Comments</span>
+                            }
+                        </Template>
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((Vendor)context).Comments)" Multiline="true" />
+                        </EditTemplate>
+                    </GridColumn>
+
+                </GridColumns>
+            </SfGrid>
+        </div>
+
+    </div>
+
+</div>

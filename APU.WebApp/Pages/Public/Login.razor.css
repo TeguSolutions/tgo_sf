@@ -1,0 +1,26 @@
+﻿.login-container {
+    background-image: url(../imgs/bg-base.jpg);
+    width: 100vw;
+    height: 100vh;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    display: flex;
+}
+
+.login-form {
+    margin: auto;
+    padding: 10px 30px;
+    background-color: lavender;
+    border-radius: 6px;
+}
+
+.login-logo {
+    background-image: url(../imgs/logo.png);
+    width: 100%;
+    height: 48px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}

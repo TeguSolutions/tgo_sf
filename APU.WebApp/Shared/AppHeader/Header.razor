@@ -1,0 +1,166 @@
+﻿@inherits HeaderVM
+
+<div class="header">
+    
+    @if (HeaderType is null || HeaderType == typeof(HeaderHome))
+    {
+        <HeaderHome/>
+    }
+    else if (HeaderType == typeof(HeaderEstimate))
+    {
+        <HeaderEstimate/>
+    }
+
+    <div class="ms-auto d-flex" style="color: white;">
+
+        <SfTooltip OpensOn="Auto" Position="@Position.TopLeft" OffsetX="238" OffsetY="-2" Width="300px">
+            <TooltipTemplates>
+                <Content>
+                    <div class="d-flex flex-column">
+                        <span class="mb-2">Project Hub - @ProjectHubStatus.HubState</span>
+
+                        <div class="ms-3 d-flex">
+                            <span style="display: block; width: 120px; margin-right: 4px;">Name</span>
+                            <span style="display: block; width: 60px; margin-right: 4px;">Comp.</span>
+                            <span style="display: block; width: 80px; margin-right: 4px;">Hub State</span>
+                        </div>
+
+                        <hr style="margin-block: 1px !important;"/>
+
+                        @foreach (var user in ProjectHubStatus.HubUsers)
+                        {
+                            <div class="ms-3 d-flex">
+                                <span style="display: block; width: 120px; margin-right: 4px;">@user.UserName</span>
+                                <span style="display: block; width: 60px; margin-right: 4px;">@user.Component</span>
+                                <span style="display: block; width: 80px; margin-right: 4px;">@user.HubState</span>
+                            </div>
+                        }
+                    </div>
+                </Content>
+            </TooltipTemplates>
+
+            <SfIcon Size="IconSize.Large" IconCss="@("my-auto me-2 " + ProjectHubStatus.ColorCss)" Name="@ProjectHubStatus.IconName" />
+        </SfTooltip>
+
+        <SfTooltip OpensOn="Auto" Position="@Position.TopLeft" OffsetX="206" OffsetY="-2" Width="340px">
+            <TooltipTemplates>
+                <Content>
+                    <div class="d-flex flex-column">
+                        <span class="mb-2">Apu Hub - @ApuHubStatus.HubState</span>
+
+                        <div class="ms-3 d-flex">
+                            <span style="display: block; width: 120px; margin-right: 4px;">Name</span>
+                            <span style="display: block; width: 100px; margin-right: 4px;">Component</span>
+                            <span style="display: block; width: 80px; margin-right: 4px;">Hub State</span>
+                        </div>
+
+                        <hr style="margin-block: 1px !important;"/>
+            
+                        @foreach (var user in ApuHubStatus.HubUsers)
+                        {
+                            <div class="ms-3 d-flex">
+                                <span style="display: block; width: 120px; margin-right: 4px;">@user.UserName</span>
+                                <span style="display: block; width: 100px; margin-right: 4px;">@user.Component</span>
+                                <span style="display: block; width: 80px; margin-right: 4px;">@user.HubState</span>
+                            </div>
+                        }
+                    </div>
+                </Content>
+            </TooltipTemplates>
+
+            <SfIcon Size="IconSize.Large" IconCss="@("my-auto me-2 " + ApuHubStatus.ColorCss)" Name="@ApuHubStatus.IconName" />
+        </SfTooltip>
+
+        <SfTooltip OpensOn="Auto" Position="@Position.TopLeft" OffsetX="174" OffsetY="-2" Width="400px">
+            <TooltipTemplates>
+                <Content>
+                    <div class="d-flex flex-column">
+                        <span class="mb-2">BaseItem Hub - @BaseItemHubStatus.HubState</span>
+
+                        <div class="ms-3 d-flex">
+                            <span style="display: block; width: 120px; margin-right: 4px;">Name</span>
+                            <span style="display: block; width: 160px; margin-right: 4px;">Component</span>
+                            <span style="display: block; width: 80px; margin-right: 4px;">Hub State</span>
+                        </div>
+
+                        <hr style="margin-block: 1px !important;"/>
+
+                        @foreach (var user in BaseItemHubStatus.HubUsers)
+                        {
+                            <div class="ms-3 d-flex">
+                                <span style="display: block; min-width: 120px; margin-right: 4px;">@user.UserName</span>
+                                <span style="display: block; min-width: 160px; margin-right: 4px;">@user.Component</span>
+                                <span style="display: block; min-width: 80px; margin-right: 4px;">@user.HubState</span>
+                            </div>
+                        }
+                    </div>
+                </Content>
+            </TooltipTemplates>
+
+            <SfIcon Size="IconSize.Large" IconCss="@("my-auto me-2 " + BaseItemHubStatus.ColorCss)" Name="@BaseItemHubStatus.IconName" />
+        </SfTooltip>
+        
+        <SfTooltip OpensOn="Auto" Position="@Position.TopLeft" OffsetX="174" OffsetY="-2" Width="400px">
+            <TooltipTemplates>
+                <Content>
+                    <div class="d-flex flex-column">
+                        <span class="mb-2">Project Schedule Hub - @ProjectScheduleHubStatus.HubState</span>
+
+                        <div class="ms-3 d-flex">
+                            <span style="display: block; width: 120px; margin-right: 4px;">Name</span>
+                            <span style="display: block; width: 160px; margin-right: 4px;">Component</span>
+                            <span style="display: block; width: 80px; margin-right: 4px;">Hub State</span>
+                        </div>
+
+                        <hr style="margin-block: 1px !important;"/>
+
+                        @foreach (var user in ProjectScheduleHubStatus.HubUsers)
+                        {
+                            <div class="ms-3 d-flex">
+                                <span style="display: block; min-width: 120px; margin-right: 4px;">@user.UserName</span>
+                                <span style="display: block; min-width: 160px; margin-right: 4px;">@user.Component</span>
+                                <span style="display: block; min-width: 80px; margin-right: 4px;">@user.HubState</span>
+                            </div>
+                        }
+                    </div>
+                </Content>
+            </TooltipTemplates>
+
+            <SfIcon Size="IconSize.Large" IconCss="@("my-auto me-2 " + ProjectScheduleHubStatus.ColorCss)" Name="@ProjectScheduleHubStatus.IconName" />
+        </SfTooltip>
+
+        <SfTooltip OpensOn="Auto" Position="@Position.TopLeft" OffsetX="142" OffsetY="-2" Width="205px">
+            <TooltipTemplates>
+                <Content>
+                    <div class="d-flex flex-column">
+                        
+                        <div class="ms-3 d-flex">
+                            <span style="display: block; width: 120px; margin-right: 4px;">Name</span>
+                            <span style="display: block; min-width: 45px;">(ms)</span>
+                        </div>
+                        
+                        <hr style="margin-block: 1px !important;"/>
+
+                        @foreach (var ul in UserLatencies)
+                        {
+                            <div class="ms-3 d-flex">
+                                <span style="display: block; min-width: 120px; margin-right: 4px;">@ul.UserName</span>
+                                <span style="display: block; min-width: 45px;">@ul.AvgLatency.ToString("### ##0")</span>
+                            </div>
+                        }
+                    </div>
+                </Content>
+            </TooltipTemplates>
+
+            <SfIcon Size="IconSize.Large" IconCss="@("my-auto me-2 ")" Name="@IconName.People" />
+        </SfTooltip>
+
+    </div>
+
+    <div class="me-1 h-progress @ProgressCss" style="">
+        <SfSpinner Visible="true" Size="26" Type="@SpinnerType.Tailwind"/>
+    </div>
+
+    <SfButton CssClass="my-auto h-fitcontent" Content="Logout" @onclick="@Logout"/>
+
+</div>

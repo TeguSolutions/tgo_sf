@@ -1,0 +1,6 @@
+.grid-header {
+    display: flex;
+    flex-direction: row;
+
+    background: var(--ts-clr-234);
+}

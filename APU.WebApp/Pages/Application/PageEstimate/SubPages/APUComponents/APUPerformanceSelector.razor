@@ -1,0 +1,26 @@
+﻿@inherits APUPerformanceSelectorVM
+
+<div class="popup-performanceselector @PopupCss" style="" @onclick:stopPropagation>
+
+    <SfTextBox @ref="@TbSearch" Placeholder="Search" ShowClearButton="true"
+               Input="@TbFilterInputChanged" @onkeypress="@TbFilterKeyPressed" />
+
+    <SfGrid @ref="@SfGrid" DataSource="@FilteredPerformances" Height="270" RowHeight="30" AllowSorting="true" EnableVirtualization="true">
+        <GridSelectionSettings Type="@SfGridSelectionType.Single"/>
+        <GridEvents TValue="BasePerformance" RowSelected="GetSelectedRecords"/>
+        <GridColumns>
+            <GridColumn Field="@nameof(BasePerformance.Id)" IsPrimaryKey="true" Width="0" Visible="false"/>
+            <GridColumn Field="@nameof(BasePerformance.Description)" HeaderText="Description" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Left"/>
+
+            <GridColumn Field="@nameof(BasePerformance.Value)" HeaderText="Perf" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Left"
+                        Width="90" EditType="EditType.NumericEdit" Format="0.00"/>
+
+            <GridColumn Field="@nameof(BasePerformance.Hours)" HeaderText="Hours" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Left"
+                        Width="80" Format="0.0000"/>
+
+            <GridColumn Field="@nameof(BasePerformance.LastUpdatedAt)" HeaderText="Date" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center"
+                        Width="130" Type="@ColumnType.Date" Format="d"/>
+        </GridColumns>
+    </SfGrid>
+
+</div>

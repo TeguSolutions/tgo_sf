@@ -1,0 +1,236 @@
+﻿@layout AppLayout
+@inherits EstimatePageVM
+@page "/estimates/estimatenew"
+
+<PageTitle>Estimates - Estimate | TechGroupOne</PageTitle>
+
+<div id="estimate-container" class="estimate-container">
+    
+    <DlgConfirmation @ref="@ConfirmationDialogApu" T="Apu" Target="estimate-container" HeaderText="Delete Confirmation" Width="350px"/>
+    <DlgApuManager @ref="@DlgApuManager" Target="estimate-container"/>
+
+    <div class="estimate-content">
+        
+        <div class="d-flex mb-2">
+            
+            <LineItemHelperTooltip/>
+
+            <SfTextBox CssClass="me-1" Width="250px" Placeholder="Search" ShowClearButton="true"
+                       Input="@TbFilterInputChanged" @onkeypress="@TbFilterKeyPressed" />
+            <SfButton IconCss="e-icons e-icon-search" CssClass="me-3" IsPrimary="true" OnClick="@Filter" />
+                
+                
+            <SfCheckBox TChecked="bool?" CssClass="my-auto e-customsize ms-auto me-1" Checked="@IsBlocked" Indeterminate="@(IsBlocked == null)" Label="Blocked:" 
+                        LabelPosition="@ButtonLabelPosition.Before" @onclick="@IsBlockedChanged" />
+           
+            <SfComboBox @ref="@SfCbProjectFilter" TValue="Guid?" TItem="ProjectModel" CssClass="me-2" Width="350px" Placeholder="Select a Project" 
+                        AllowFiltering="true"
+                        DataSource="@FilteredProjectModels" Value="@SelectedProjectId" >
+                <ComboBoxFieldSettings Value="@nameof(ProjectModel.Id)" Text="@nameof(ProjectModel.ProjectName)" />
+                <ComboBoxEvents TValue="Guid?" TItem="ProjectModel" Filtering="ProjectFilterChanged" ValueChange="@SelectedProjectCBChanged"/>
+            </SfComboBox>
+
+            <SfButton IconCss="e-icons e-icon-export-excel" CssClass="me-1 w-60px" OnClick="@ExportAsExcel"/>
+            
+            <InputFile id="fileinput-excelimport" OnChange="ImportExcel" hidden accept=".xlsx" />
+            <SfButton CssClass="me-1" Content="Import Excel" @onclick="@OpenExcelImportFileSelector" />
+
+            <InputFile id="fileinput-rsmeans" OnChange="ParseRSMeansFile" hidden accept=".csv, .xlsx" />
+            <SfButton CssClass="me-3" Content="RSMeans Report" @onclick="@OpenRSMeanFileSelector" />
+
+            <SfButton IconCss="e-icons e-icon-plus" CssClass="e-success w-60px" OnClick="@(() => DlgApuManagerOpen())"/>
+
+        </div>
+        
+        <div class="estimate-grid-container grid-estimate" style="position: relative;">
+            
+            <div class="estimate-grid-columnchooser-button">
+                @* <SfButton CssClass="estimate-grid-columnchooser-button" Content="Columns" OnClick="@(() => GCS?.TogglePopup())"/> *@
+            </div>
+        
+            @* <EstimatePageGridColumnChooser @ref="@GCS"/> *@
+
+            <DataGrid Id="GridEstimate" Items="@SelectedProject?.FilteredApus" MaxHeight="1000px" AllowGrouping="true">
+                
+                <Groups>
+                    <DataGridGroup T="Apu" Field="@nameof(Apu.GroupId)">
+                        <GroupTemplate>
+                            <span class="my-auto" style="font-weight: 600;">@("Group: " + context.GroupId)</span>
+                        </GroupTemplate>
+                    </DataGridGroup>
+                </Groups>
+
+                <Columns>
+                    @* <DataGridColumn T="@Apu" Field="@nameof(Apu.Id)" Width="0px" /> *@
+                    
+                    <DataGridColumn T="@Apu" Header="Manage" TextAlign="TTA.Center" Width="120px">
+                        <Template>
+                            <SfButton IconCss="e-icons e-edit" CssClass="e-flat" @onclick="@(() => DlgApuManagerOpen(context))" />
+                            <SfButton IconCss="e-icons e-delete" CssClass="e-flat" @onclick="@(() => ConfirmationDialogApuOpen(context))"/>
+                        </Template>
+                    </DataGridColumn>
+                    
+                    <DataGridColumn T="@Apu" Field="GroupId" Header="Group" HeaderTextAlign="TTA.Center" Width="70px">
+                        <Template>
+                            <span>@context.GroupId</span>
+                        </Template>
+                    </DataGridColumn>
+                    
+                    <DataGridColumn T="@Apu" Field="ItemId" Header="Item" HeaderTextAlign="TTA.Center" Width="70px">
+                        <Template>
+                            @{
+                                if (context.GroupId <= 1000 && context.ItemId >= 1 && context.ItemId <= 999)
+                                {
+                                    <SfButton Content="@context.ItemId.ToString()" @onclick="@(() => NavigateToApu(context))" />
+                                }
+                                else
+                                {
+                                    <span>@context.ItemId</span>
+                                }
+                            }
+                        </Template>
+                    </DataGridColumn>
+                    
+                    @* ValidationRules="@(new ValidationRules { MaxLength = 5, Required = false })" *@
+                    <DataGridColumn T="@Apu" Field="Code" Header="Code" HeaderTextAlign="TTA.Center" Width="80px"/>
+                    
+                    <DataGridColumn T="@Apu" Field="IsBlocked" Header="B" HeaderTextAlign="TTA.Center" Width="32px">
+                        <Template>
+                            @{
+                                if (context.ItemId is >= 1 and <= 999)
+                                {
+                                    @if (Liu.IsAdministrator || Liu.IsSupervisor)
+                                    {
+                                        <input class="csr-ptr" style="width: 18px; height: 18px; margin-top: 5px;" type="checkbox" checked="@context.IsBlocked" @oninput="@(() => UpdateApuBlock(context))" />
+                                    }
+                                    else
+                                    {
+                                        <input class="csr-ptr" style="width: 18px; height: 18px; margin-top: 5px;" type="checkbox" checked="@context.IsBlocked" disabled />
+                                    }
+                                }
+                            }
+                        </Template>
+                    </DataGridColumn>
+                    
+                    <DataGridColumn T="@Apu" Field="Status" Header="Status" HeaderTextAlign="TTA.Center" Width="125px">
+                        <Template>
+                            @{
+                                if (context.ItemId is >= 1 and <= 999)
+                                {
+                                    var bgcss = context.StatusId switch
+                                    {
+                                        2 => "bg-clr-lightyellow",
+                                        3 => "bg-clr-lightgreen",
+                                        _ => ""
+                                    };
+
+                                    @if (CanModifyBlockedApu(context))
+                                    {
+                                        <SfDropDownList CssClass="@bgcss" TValue="int" TItem="ApuStatus" DataSource="@ApuStatusDefinitions.Collection" Value="@context.StatusId" AllowFiltering="false">
+                                            <DropDownListEvents TValue="int" TItem="ApuStatus" OnValueSelect="@((arg) => SfDropDownApuStatus_OnValueSelect(arg, context))" />
+                                            <DropDownListFieldSettings Value="@nameof(ApuStatus.Id)" Text="@nameof(ApuStatus.Name)"/>
+                                        </SfDropDownList>
+                                    }
+                                    else
+                                    {
+                                        <div style="height: 30px; display: flex; border-radius: 4px; padding-left: 8px;" class="@bgcss">
+                                            <span class="my-auto">@(context.Status?.Name)</span>
+                                        </div>
+                                    }
+                                }
+                            }
+                        </Template>
+                    </DataGridColumn>
+                    
+                    <DataGridColumn T="@Apu" Field="Description" Header="Description" HeaderTextAlign="TTA.Center" Width="400px">
+                        <Template>
+                            <span class="spantextbox estimate-item-description" role="textbox" contenteditable @onkeypress:preventDefault>
+                                @context.Description
+                            </span>
+                        </Template>
+                    </DataGridColumn>
+                    
+                    <DataGridColumn T="@Apu" Field="Unit" Header="Unit" HeaderTextAlign="TTA.Center" Width="80px" />
+                    
+                    <DataGridColumn T="@Apu" Field="Quantity" Header="Qty" HeaderTextAlign="TTA.Center" TextAlign="@TTA.End" Width="100px">
+                        <Template>
+                            <span>@context.Quantity.ToString("N2")</span>
+                        </Template>
+                    @*<EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((Apu)context).Quantity)" Placeholder="Qty" Min="0" Format="n" ShowSpinButton="false"/>
+                        </EditTemplate>*@
+                    </DataGridColumn>
+
+                    @*01*@
+                    <DataGridColumn T="@Apu" Field="LaborSum.Total" Header="Unit Labor" HeaderTextAlign="TTA.Center" TextAlign="TTA.End" Width="100px">
+                        <Template>
+                            <span>@context.LaborSum.Total.ToString("C", new CultureInfo("en-US"))</span>
+                        </Template>
+                    </DataGridColumn>
+                    <DataGridColumn T="@Apu" Field="LaborSum.TotalExtend" Header="Labor Subtotal" HeaderTextAlign="TTA.Center" TextAlign="TTA.End" Width="100px">
+                        <Template>
+                            <span>@context.LaborSum.TotalExtend.ToString("C", new CultureInfo("en-US"))</span>
+                        </Template>
+                    </DataGridColumn>
+                    
+                    <DataGridColumn T="@Apu" Field="MaterialSum.Total" Header="Unit Material" HeaderTextAlign="TTA.Center" TextAlign="TTA.End" Width="100px">
+                        <Template>
+                            <span>@context.MaterialSum.Total.ToString("C", new CultureInfo("en-US"))</span>
+                        </Template>
+                    </DataGridColumn>
+                    <DataGridColumn T="@Apu" Field="MaterialSum.TotalExtend" Header="Material Subtotal" HeaderTextAlign="TTA.Center" TextAlign="TTA.End" Width="110px">
+                        <Template>
+                            <span>@context.MaterialSum.TotalExtend.ToString("C", new CultureInfo("en-US"))</span>
+                        </Template>
+                    </DataGridColumn>
+                    
+                    <DataGridColumn T="@Apu" Field="EquipmentSum.Total" Header="Unit Equipment" HeaderTextAlign="TTA.Center" TextAlign="TTA.End" Width="100px">
+                        <Template>
+                            <span>@context.EquipmentSum.Total.ToString("C", new CultureInfo("en-US"))</span>
+                        </Template>
+                    </DataGridColumn>
+                    <DataGridColumn T="@Apu" Field="EquipmentSum.TotalExtend" Header="Equipment Subtotal" HeaderTextAlign="TTA.Center" TextAlign="TTA.End" Width="100px">
+                        <Template>
+                            <span>@context.EquipmentSum.TotalExtend.ToString("C", new CultureInfo("en-US"))</span>
+                        </Template>
+                    </DataGridColumn>
+                    
+                    <DataGridColumn T="@Apu" Field="ContractSum.Total" Header="Unit Contract" HeaderTextAlign="TTA.Center" TextAlign="TTA.End" Width="100px">
+                        <Template>
+                            <span>@context.ContractSum.Total.ToString("C", new CultureInfo("en-US"))</span>
+                        </Template>
+                    </DataGridColumn>
+                    <DataGridColumn T="@Apu" Field="ContractSum.TotalExtend" Header="Contract Subtotal" HeaderTextAlign="TTA.Center" TextAlign="TTA.End" Width="110px">
+                        <Template>
+                            <span>@context.ContractSum.TotalExtend.ToString("C", new CultureInfo("en-US"))</span>
+                        </Template>
+                    </DataGridColumn>
+                    
+                    <DataGridColumn T="@Apu" Field="Sum.Total" Header="Price" HeaderTextAlign="TTA.Center" TextAlign="TTA.End" Width="100px">
+                        <Template>
+                            @{
+                                if (context.GroupId == 1000 && context.ItemId == 1004)
+                                {
+                                    <span>@SelectedProject?.Bond.ToPercentage()</span>
+                                }
+                                else
+                                {
+                                    <span>@(context.Sum.Total.ToString("C", new CultureInfo("en-US")))</span>
+                                }
+                            }
+                        </Template>
+                    </DataGridColumn>
+                    <DataGridColumn T="@Apu" Field="Sum.TotalExtend" Header="Total Price" HeaderTextAlign="TTA.Center" TextAlign="TTA.End" Width="125px">
+                        <Template>
+                            <span>@(context.Sum.TotalExtend.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </DataGridColumn>
+                    
+
+                </Columns>
+            </DataGrid>
+        </div>
+
+    </div>
+
+</div>

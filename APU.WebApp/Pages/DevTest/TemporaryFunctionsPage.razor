@@ -1,0 +1,19 @@
+﻿@layout AppLayout
+@page "/dev/tempfunctions"
+@inherits TemporaryFunctionsVM
+
+<PageTitle>Temporary Functions</PageTitle>
+
+<div class="d-flex flex-column">
+    
+    <p class="mb-2">Assign ApuLabor/ApuMaterial/ApuEquipment/ApuContract CreatedAt property from LastUpdatedAt</p>
+    
+    <div class="mb-2">
+        <SfButton Content="Assign CreatedAt" @onclick="@AssignCreatedAt" />
+    </div>
+    
+    <span>@Message</span>
+
+    <hr/>
+
+</div>

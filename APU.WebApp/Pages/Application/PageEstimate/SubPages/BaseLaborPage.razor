@@ -1,0 +1,177 @@
+﻿@layout AppLayout
+@inherits BaseLaborPageVM
+@page "/estimates/labor"
+
+<PageTitle>Estimates - Labor | TechGroupOne</PageTitle>
+
+<div id="labor-container" class="labor-container">
+    
+    <DlgConfirmation @ref="@(ConfirmationDialogLabor)" T="BaseLabor" Target="labor-container" HeaderText="Delete Confirmation" Width="350px" />
+    <DlgLaborManager @ref="@LaborManager" Target="labor-container"/>
+
+    <div class="labor-content">
+        
+        <div class="d-flex mb-2">
+
+            <SfTextBox CssClass="me-1" Width="250px" Placeholder="Search" ShowClearButton="true"
+                       Input="@TbFilterInputChanged" @onkeypress="@TbFilterKeyPressed" />
+            <SfButton IconCss="e-icons e-icon-search" CssClass="me-3" IsPrimary="true" OnClick="@GetFilteredItems"/>
+
+            <SfButton IconCss="e-icons e-icon-export-excel" CssClass="me-3 w-60px" OnClick="@ExportAsExcel"/>
+
+            <SfButton IconCss="e-icons e-icon-plus" CssClass="e-success w-60px" OnClick="@LaborManagerOpen"/>
+
+        </div>
+        
+        <div class="labor-grid-container">
+            <SfGrid @ref="@(Grid)" ID="GridLabor" Height="100%" Width="100%" DataSource="@FilteredLabors"
+                    AllowPaging="true" AllowTextWrap="true" AllowSorting="true" AllowResizing="false"
+                    AllowExcelExport="true" AllowPdfExport="true">
+                
+                <GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"/>
+                <GridTextWrapSettings WrapMode="WrapMode.Content"/>
+                <GridEvents TValue="BaseLabor" CommandClicked="@DataGridCommandClick" OnActionBegin="@DataGridOnActionBegin" />
+                <GridPageSettings PageSize="20" PageSizes="@SyncfusionHelper.GridPageSizes" />
+
+                <GridColumns>
+                    <GridColumn Field="@nameof(BaseLabor.Id)" IsPrimaryKey="true" Width="0" Visible="false"/>
+                    
+                    <GridColumn HeaderText="Manage" Width="120" TextAlign="SfGridTextAlign.Center">
+                        <GridCommandColumns>
+                            <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-edit", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-delete", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Save" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-save", CssClass = "e-flat" })"/>
+                            <GridCommandColumn Type="CommandButtonType.Cancel" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-cancel-icon", CssClass = "e-flat" })"/>
+                        </GridCommandColumns>
+                    </GridColumn>
+                    
+                    <GridColumn Field="@nameof(BaseLabor.Description)" HeaderText="Description" HeaderTextAlign="SfGridTextAlign.Center" Width="400">
+                        <EditTemplate>
+                            <SfTextBox @bind-Value="@(((BaseLabor)context).Description)" Multiline="true"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BaseLabor.Salary)" HeaderText="Salary" Width="120" HeaderTextAlign="@SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right">
+                        <Template>
+                            <span>@(((BaseLabor)context).Salary.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).Salary)" Placeholder="Salary" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(BaseLabor.Cost)" HeaderText="Labor Cost" Width="120" HeaderTextAlign="@SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" AllowEditing="false">
+                        <Template>
+                            <span>@(((BaseLabor)context).Cost.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                        <EditTemplate>
+                            <span>@(((BaseLabor)context).Cost.ToString("C", new CultureInfo("en-US")))</span>
+                        </EditTemplate>
+                    </GridColumn>
+                    
+                    <GridColumn Field="@nameof(BaseLabor.HrsYear)" HeaderText="Tot Hours" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="90" Format="0.##">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).HrsYear)" Placeholder="Total Hours" Min="0" Format="0" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(BaseLabor.HrsStandardYear)" HeaderText="Std Hours" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="90" Format="0.##">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).HrsStandardYear)" Placeholder="Standard Hours" Min="0" Format="0" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(BaseLabor.HrsOvertimeYear)" HeaderText="OT Hours" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="90" Format="0.##">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).HrsOvertimeYear)" Placeholder="Overtime Hours" Min="0" Format="0" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    
+                    <GridColumn Field="@nameof(BaseLabor.VacationsDays)" HeaderText="Vacation" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="90" Format="0.##">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).VacationsDays)" Placeholder="Vacation" Min="0" Format="0" Decimals="0" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(BaseLabor.HolydaysYear)" HeaderText="Holiday" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="90" Format="0.##">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).HolydaysYear)" Placeholder="Holidays" Min="0" Format="0" Decimals="0" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(BaseLabor.SickDaysYear)" HeaderText="Sick Days" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="90" Format="0.##">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).SickDaysYear)" Placeholder="Sick Days" Min="0" Format="0" Decimals="0" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BaseLabor.BonusYear)" HeaderText="Bonus" HeaderTextAlign="@SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="120">
+                        <Template>
+                            <span>@(((BaseLabor)context).BonusYear.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).BonusYear)" Placeholder="Bonus" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(BaseLabor.HealthYear)" HeaderText="Health" HeaderTextAlign="@SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="120">
+                        <Template>
+                            <span>@(((BaseLabor)context).HealthYear.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).HealthYear)" Placeholder="Health" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(BaseLabor.LifeInsYear)" HeaderText="Life Insurance" HeaderTextAlign="@SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="120">
+                        <Template>
+                            <span>@(((BaseLabor)context).LifeInsYear.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).LifeInsYear)" Placeholder="Life Insurance" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(BaseLabor.Percentage401)" HeaderText="401 %" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.##">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).Percentage401)" Placeholder="401 %" Min="0" Format="0.##" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    
+                    <GridColumn Field="@nameof(BaseLabor.MeetingsHrsYear)" HeaderText="Meeting" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.##">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).MeetingsHrsYear)" Placeholder="Meeting Hours" Min="0" Format="0.##" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(BaseLabor.OfficeHrsYear)" HeaderText="Office" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.##">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).OfficeHrsYear)" Placeholder="Office Hours" Min="0" Format="0.##" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(BaseLabor.TrainingHrsYear)" HeaderText="Training" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="80" Format="0.##">
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).TrainingHrsYear)" Placeholder="Training Hours" Min="0" Format="0.##" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    
+                    <GridColumn Field="@nameof(BaseLabor.UniformsYear)" HeaderText="Uniform" HeaderTextAlign="@SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="120">
+                        <Template>
+                            <span>@(((BaseLabor)context).UniformsYear.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).UniformsYear)" Placeholder="Uniform" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(BaseLabor.SafetyYear)" HeaderText="Safety" HeaderTextAlign="@SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="120">
+                        <Template>
+                            <span>@(((BaseLabor)context).SafetyYear.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((BaseLabor)context).SafetyYear)" Placeholder="Safety" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    
+                    <GridColumn Field="@nameof(BaseLabor.LastUpdatedAt)" HeaderText="Date" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center" Width="130" Type="@ColumnType.Date" Format="d" AllowEditing="false"/>
+                    <GridColumn Field="@(nameof(BaseLabor.LastUpdatedBy) + "." + nameof(User.Monogram))" HeaderText="User" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center" Width="100" AllowEditing="false"/>
+
+                </GridColumns>
+            </SfGrid>
+        </div>
+        
+
+    </div>
+
+</div>

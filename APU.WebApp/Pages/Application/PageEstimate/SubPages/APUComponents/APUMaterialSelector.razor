@@ -1,0 +1,26 @@
+﻿@inherits APUMaterialSelectorVM
+
+<div class="popup-materialselector @PopupCss" style="top: @TopPx;" @onclick:stopPropagation>
+
+    <SfTextBox @ref="@TbSearch" Placeholder="Search" ShowClearButton="true"
+               Input="@TbFilterInputChanged" @onkeypress="@TbFilterKeyPressed" />
+
+    <SfGrid @ref="@SfGrid" DataSource="@FilteredMaterials" Height="270" RowHeight="30" AllowSorting="true" EnableVirtualization="true">
+        <GridSelectionSettings Type="@SfGridSelectionType.Single"/>
+        <GridEvents TValue="BaseMaterial" RowSelected="GetSelectedRecords" />
+        <GridColumns>
+            <GridColumn Field="@nameof(BaseMaterial.Id)" IsPrimaryKey="true" Width="0" Visible="false" />
+            <GridColumn Field="@nameof(BaseMaterial.Description)" HeaderText="Description" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Left" />
+            <GridColumn Field="@nameof(BaseMaterial.Unit)" HeaderText="Unit" HeaderTextAlign="SfGridTextAlign.Center" Width="90" />
+            <GridColumn Field="@nameof(BaseMaterial.Price)" HeaderText="Price" HeaderTextAlign="@SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                <Template>
+                    <span>@(((BaseMaterial)context).Price.ToString("C", new CultureInfo("en-US")))</span>
+                </Template>
+            </GridColumn>
+
+            <GridColumn Field="@nameof(BaseMaterial.LastUpdatedAt)" HeaderText="Date" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center"
+                        Width="130" Type="@ColumnType.Date" Format="d" />
+        </GridColumns>
+    </SfGrid>
+
+</div>

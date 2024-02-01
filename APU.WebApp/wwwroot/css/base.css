@@ -1,0 +1,156 @@
+﻿.mt-4px {
+    margin-top: 4px;
+}
+
+.px-4px {
+    padding-inline: 4px;
+}
+.px-12px {
+    padding-inline: 12px;
+}
+
+.w-20 {
+    width: 20% !important;
+}
+
+.w-30px {
+    width: 30px !important;
+}
+
+.w-39px {
+    width: 39px !important;
+}
+.w-40px {
+    width: 40px !important;
+}
+
+.w-60px {
+    width: 60px;
+}
+
+.w-100px {
+    width: 100px;
+}
+
+.wmm-60px {
+    min-width: 60px;
+    width: 60px;
+    max-width: 60px;
+}
+
+.wmm-95px {
+    min-width: 95px;
+    width: 95px;
+    max-width: 95px;
+}
+
+.wmm-105px {
+    min-width: 105px;
+    width: 105px;
+    max-width: 105px;
+}
+
+.wmm-140px {
+    min-width: 140px;
+    width: 140px;
+    max-width: 140px;
+}
+
+.b-none {
+    border: none !important;
+}
+.br-0 {
+    border-radius: 0 !important;
+}
+
+.h-fitcontent {
+    height: fit-content;
+}
+
+.fw-500 {
+    font-weight: 500;
+}
+.fw-600 {
+    font-weight: 600;
+}
+.fw-700 {
+    font-weight: 700;
+}
+
+.fs-12px {
+    font-size: 12px !important;
+}
+.fs-13px {
+    font-size: 13px !important;
+}
+
+.fs-0p8rem {
+    font-size: 0.8rem !important;
+}
+.fs-0p9rem {
+    font-size: 0.9rem !important;
+}
+
+.csr-hover {
+    cursor: pointer;
+}
+.csr-ptr {
+    cursor: pointer;
+}
+.csr-text {
+    cursor: text;
+}
+
+.text-center {
+    text-align: center !important;
+}
+.text-left {
+    text-align: left !important;
+}
+
+.td-ul {
+    text-decoration: underline !important;
+}
+
+.tt-none {
+    text-transform: none !important;
+}
+
+.z-99 {
+    z-index: 99 !important
+}
+
+.z-10000 {
+    z-index: 10000 !important;
+}
+
+.clr-green {
+    color: lime;
+}
+.clr-orange {
+    color: orange;
+}
+.clr-red {
+    color: red;
+}
+.clr-blue {
+    color: dodgerblue;
+}
+.clr-gray {
+    color: gray;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Old versions of Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
+
+.pointer-events-all {
+    pointer-events: all !important;
+}

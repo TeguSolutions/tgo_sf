@@ -1,0 +1,129 @@
+﻿@inherits DlgProjectManagerVM
+
+<SfDialog @bind-Visible="@IsVisible" IsModal="true" Width="400px" Target="@Target" CloseOnEscape="false">
+
+    <DialogTemplates>
+        <Header>
+            <span>@Mode.ToString() Project</span>
+        </Header>
+        <Content>
+            
+            <EditForm Model="@Project" OnValidSubmit="@DialogSubmit">
+                <DataAnnotationsValidator />
+
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Project Name:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Project.ProjectName" Placeholder="Project Name" Multiline="true"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Project.ProjectName)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Owner:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Project.Owner" Placeholder="Owner"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Project.Owner)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Phone:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Project.Phone" Placeholder="Phone"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Project.Phone)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Email:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Project.Email" Placeholder="Email" Type="@InputType.Email"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Project.Email)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Address:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Project.Address" Placeholder="Address" Multiline="true"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Project.Address)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">City:</span>
+                    <div class="w-100">
+                        <SfComboBox TValue="int?" TItem="City" Placeholder="Select a City" DataSource="@Cities" 
+                                    @bind-Value="@Project.CityId">
+                            <ComboBoxFieldSettings Value="@nameof(City.Id)" Text="@nameof(City.Name)" />
+                        </SfComboBox>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Project.City)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">State:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Project.State" Placeholder="State"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Project.State)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">ZIP:</span>
+                    <div class="w-100">
+                        <SfNumericTextBox @bind-Value="@Project.Zip" Placeholder="Zip" Min="0" Format="0" ShowSpinButton="false"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Project.Zip)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Estimator:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Project.Estimator" Placeholder="Estimator"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Project.Estimator)"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Link:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Project.Link" Placeholder="Link" Type="@InputType.URL"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Project.Link)"/>
+                        </div>
+                    </div>
+                </div>
+
+            <div class="d-flex justify-content-end">
+                <div class="me-2" @onclick:preventDefault>
+                    <SfButton Content="Cancel" OnClick="@DialogCancel"/>
+                </div>
+                <SfButton Content="@Mode.ToString()" IsPrimary="true"/>
+            </div>
+
+            </EditForm>
+
+        </Content>
+    </DialogTemplates>
+
+</SfDialog>

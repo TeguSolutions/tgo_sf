@@ -1,0 +1,98 @@
+﻿@inherits DlgMunicipalityManagerVM
+
+<SfDialog @bind-Visible="@IsVisible" IsModal="true" Width="400px" Target="estimate-container" CloseOnEscape="false">
+
+    <DialogTemplates>
+        <Header>
+            Add Certificate
+        </Header>
+        <Content>
+
+            <EditForm Model="@NewItem" OnValidSubmit="@DialogSubmit">
+                <DataAnnotationsValidator />
+
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Name:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.Name" Placeholder="Name" />
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => NewItem.Name)" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Address:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.Address" Placeholder="Address" />
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Phone:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.Phone" Placeholder="Phone" />
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Fax:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.Fax" Placeholder="Fax" />
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">WebLink:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.WebLink" Placeholder="WebLink" />
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Building:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.Building" Placeholder="Building" />
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">Bid:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.Bid" Placeholder="Bid" />
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">BidSync:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@NewItem.BidSync" Placeholder="BidSync" />
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-1">
+                    <span class="me-2 mt-4px wmm-95px text-end">County:</span>
+                    <div class="w-100">
+                        <SfComboBox TValue="int" TItem="County" Placeholder="Select a County" DataSource="@Counties" 
+                                    Value="@NewItem.CountyId" ValueChanged="@CountyChanged">
+                            <ComboBoxFieldSettings Value="@nameof(County.Id)" Text="@nameof(County.Name)" />
+                        </SfComboBox>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => NewItem.County)" />
+                        </div>
+                    </div>
+                </div>
+       
+                <div class="d-flex justify-content-end">
+                    <div class="me-2" @onclick:preventDefault>
+                        <SfButton Content="Cancel" OnClick="@DialogCancel" />
+                    </div>
+                    <SfButton Content="Submit" IsPrimary="true" />
+                </div>
+
+            </EditForm>
+
+        </Content>
+    </DialogTemplates>
+
+</SfDialog>

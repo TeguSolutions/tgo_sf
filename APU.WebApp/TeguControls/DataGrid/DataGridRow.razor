@@ -1,0 +1,28 @@
+﻿@namespace Tegu.Blazor.Controls
+@typeparam T
+@inherits DataGridRowVM<T>
+
+<CascadingValue Value="this">
+
+    <div id="@Id" class="grid-row" @onclick="@Click">
+         
+        <div style="display: flex; flex-direction: row;" @onclick="@(() => DataGrid.ToggleExpandTemplate(Item))">
+            @foreach (var column in DataGrid.DataColumns)
+            {
+                if (DataGrid.AllowGrouping)
+                {
+                    if (DataGrid.GroupVMs.FirstOrDefault(g => g.Field == column.Field) != null)
+                        continue;
+                }
+                <DataGridRowCell T="T" Column="@column"/>
+            }
+        </div>
+
+        @if (DataGrid.ExpandTemplate is not null && ShowExpandTemplate)
+        {
+            @DataGrid.ExpandTemplate(Item)
+        }
+
+    </div>
+
+</CascadingValue>

@@ -1,0 +1,11 @@
+.grid-rowcell {
+    padding: 2px 6px;
+    text-align: left;
+
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.grid-rowcell-span {
+    margin-block: auto;
+}

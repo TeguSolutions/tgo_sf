@@ -1,0 +1,117 @@
+﻿@layout AppLayout
+@inherits DefaultsPageVM
+@page "/estimates/defaults"
+
+<PageTitle>Estimates - Defaults | TechGroupOne</PageTitle>
+
+<div id="defaults-container" class="defaults-container">
+
+    <div class="defaults-content">
+
+        @if (Default is not null)
+        {
+            <h3 class="mt-2 mb-3 text-center">Default Values</h3>
+
+            <div class="defaults-form-container">
+                <EditForm Model="@Default" OnValidSubmit="@UpdateDefaults">
+                    <DataAnnotationsValidator/>
+
+                    <div class="d-flex mb-1">
+                        <span class="me-2 mt-4px wmm-140px text-end">Gross (%):</span>
+                        <div class="w-100">
+                            <SfNumericTextBox @bind-Value="@Default.Gross" Min="0" Format="n" ShowSpinButton="false"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-1">
+                        <span class="me-2 mt-4px wmm-140px text-end">Supervision (%):</span>
+                        <div class="w-100">
+                            <SfNumericTextBox @bind-Value="@Default.Supervision" Min="0" Format="n" ShowSpinButton="false"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-1">
+                        <span class="me-2 mt-4px wmm-140px text-end">Tools (%):</span>
+                        <div class="w-100">
+                            <SfNumericTextBox @bind-Value="@Default.Tools" Min="0" Format="n" ShowSpinButton="false"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-1">
+                        <span class="me-2 mt-4px wmm-140px text-end">Workers Comp (%):</span>
+                        <div class="w-100">
+                            <SfNumericTextBox @bind-Value="@Default.WorkersComp" Min="0" Format="n" ShowSpinButton="false"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-1">
+                        <span class="me-2 mt-4px wmm-140px text-end">FICA (%):</span>
+                        <div class="w-100">
+                            <SfNumericTextBox @bind-Value="@Default.Fica" Min="0" Format="n" ShowSpinButton="false"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-1">
+                        <span class="me-2 mt-4px wmm-140px text-end">Top FICA ($):</span>
+                        <div class="w-100">
+                            <SfNumericTextBox @bind-Value="@Default.TopFica" Min="0" Format="n" ShowSpinButton="false"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-1">
+                        <span class="me-2 mt-4px wmm-140px text-end">FUTA ($):</span>
+                        <div class="w-100">
+                            <SfNumericTextBox @bind-Value="@Default.FutaSuta" Min="0" Format="n" ShowSpinButton="false"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-1">
+                        <span class="me-2 mt-4px wmm-140px text-end">Sales Tax (%):</span>
+                        <div class="w-100">
+                            <SfNumericTextBox @bind-Value="@Default.SalesTax" Min="0" Format="n" ShowSpinButton="false"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-1">
+                        <span class="me-2 mt-4px wmm-140px text-end">Bond (%):</span>
+                        <div class="w-100">
+                            <SfNumericTextBox @bind-Value="@Default.Bond" Min="0" Format="n" ShowSpinButton="false"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-1">
+                        <span class="me-2 mt-4px wmm-140px text-end">Hours Day:</span>
+                        <div class="w-100">
+                            <SfNumericTextBox @bind-Value="@Default.HrsDay" Min="0" Format="n" ShowSpinButton="false"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-1">
+                        <span class="me-2 mt-4px wmm-140px text-end">Date:</span>
+                        <div class="w-100">
+                            <SfDatePicker @bind-Value="@Default.LastUpdatedAt" Readonly="true"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-2">
+                        <span class="me-2 mt-4px wmm-140px text-end">User:</span>
+                        <div class="w-100">
+                            <SfTextBox Value="@Default.LastUpdatedBy?.Monogram" Readonly="true"/>
+                        </div>
+                    </div>
+
+
+
+                    <div class="d-flex justify-content-end">
+                        <SfButton Content="Update" IsPrimary="true"/>
+                    </div>
+
+                </EditForm>
+            </div>
+
+
+        }
+
+    </div>
+
+</div>

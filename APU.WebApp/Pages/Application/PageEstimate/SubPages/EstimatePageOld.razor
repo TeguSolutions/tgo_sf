@@ -1,0 +1,399 @@
+﻿@layout AppLayout
+@inherits EstimatePageOldVM
+@page "/estimates/estimate"
+
+<PageTitle>Estimates - Estimate | TechGroupOne</PageTitle>
+
+<div id="estimate-container" class="estimate-container">
+    
+    <DlgConfirmation @ref="@ConfirmationDialogApu" T="Apu" Target="estimate-container" HeaderText="Delete Confirmation" Width="350px"/>
+    <DlgApuManager @ref="@DlgApuManager" Target="estimate-container"/>
+
+    <div class="estimate-content">
+        
+        <div class="d-flex mb-2">
+            
+            <LineItemHelperTooltip/>
+
+            <SfTextBox CssClass="me-1" Width="250px" Placeholder="Search" ShowClearButton="true"
+                       Input="@TbFilterInputChanged" @onkeypress="@TbFilterKeyPressed" />
+            <SfButton IconCss="e-icons e-icon-search" CssClass="me-3" IsPrimary="true" OnClick="@Filter" />
+                
+                
+            <SfCheckBox TChecked="bool?" CssClass="my-auto e-customsize ms-auto me-1" Checked="@IsBlocked" Indeterminate="@(IsBlocked == null)" Label="Blocked:" 
+                        LabelPosition="@ButtonLabelPosition.Before" @onclick="@IsBlockedChanged" />
+           
+            <SfComboBox @ref="@SfCbProjectFilter" TValue="Guid?" TItem="ProjectModel" CssClass="me-2" Width="350px" Placeholder="Select a Project" 
+                        AllowFiltering="true"
+                        DataSource="@FilteredProjectModels" Value="@SelectedProjectId" >
+                <ComboBoxFieldSettings Value="@nameof(ProjectModel.Id)" Text="@nameof(ProjectModel.ProjectName)" />
+                <ComboBoxEvents TValue="Guid?" TItem="ProjectModel" Filtering="ProjectFilterChanged" ValueChange="@SelectedProjectCBChanged"/>
+            </SfComboBox>
+
+            <SfButton IconCss="e-icons e-icon-export-excel" CssClass="me-1 w-60px" OnClick="@ExportAsExcel"/>
+            
+            <InputFile id="fileinput-excelimport" OnChange="ImportExcel" hidden accept=".xlsx" />
+            <SfButton CssClass="me-1" Content="Import Excel" @onclick="@OpenExcelImportFileSelector" />
+
+            <InputFile id="fileinput-rsmeans" OnChange="ParseRSMeansFile" hidden accept=".csv, .xlsx" />
+            <SfButton CssClass="me-3" Content="RSMeans Report" @onclick="@OpenRSMeanFileSelector" />
+
+            <SfButton IconCss="e-icons e-icon-plus" CssClass="e-success w-60px" OnClick="@(() => DlgApuManagerOpen())"/>
+
+        </div>
+        
+        <div class="estimate-grid-container grid-estimate" style="position: relative;">
+            
+            <div class="estimate-grid-columnchooser-button">
+                <SfButton CssClass="estimate-grid-columnchooser-button" Content="Columns" OnClick="@(() => GCS?.TogglePopup())"/>
+            </div>
+        
+            <EstimatePageGridColumnChooser @ref="@GCS"/>
+
+            <SfGrid @ref="@Grid" ID="GridEstimate" Height="100%" Width="100%" DataSource="@SelectedProject?.FilteredApus"
+                    AllowPaging="false" AllowSorting="false" AllowResizing="false" 
+                    AllowGrouping="true" AllowTextWrap="true">
+
+                <GridEditSettings AllowDeleting="true" AllowEditing="false"/>
+                <GridTextWrapSettings WrapMode="WrapMode.Both"/>
+                <GridGroupSettings Columns="@(new[] {nameof(Apu.GroupId)})"/>
+                <GridEvents TValue="Apu" 
+                            QueryCellInfo="@GridQueryCellInfoHandler"
+                            RowDataBound="@GridRowDataBound"/>
+
+                <GridColumns>
+                    <GridColumn Field="Id" IsPrimaryKey="true" Width="0" Visible="false"/>
+
+                    <GridColumn HeaderText="Manage" TextAlign="SfGridTextAlign.Center" Width="120">
+                        <Template>
+                            <SfButton IconCss="e-icons e-edit" CssClass="e-flat" @onclick="@(() => DlgApuManagerOpen((Apu)context))" />
+                            <SfButton IconCss="e-icons e-delete" CssClass="e-flat" @onclick="@(() => ConfirmationDialogApuOpen((Apu)context))"/>
+                        </Template>
+                    </GridColumn>
+
+                    <GridColumn Field="GroupId" HeaderText="Group" HeaderTextAlign="SfGridTextAlign.Center" Width="70">
+                        <Template>
+                            @{
+                                var p = (Apu)context;
+                                            <span>@p.GroupId</span>
+                            }
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="ItemId" HeaderText="Item" HeaderTextAlign="SfGridTextAlign.Center" Width="70">
+                        <Template>
+                            @{
+                                var p = (Apu)context;
+
+                                if (p.GroupId <= 1000 && p.ItemId >= 1 && p.ItemId <= 999)
+                                {
+                                    <SfButton Content="@p.ItemId.ToString()" @onclick="@(() => NavigateToApu(p))"/>
+                                }
+                                else
+                                {
+                                    <span>@p.ItemId</span>
+                                }
+                            }
+                        </Template>
+                    </GridColumn>
+
+                    <GridColumn Field="Code" HeaderText="Code" HeaderTextAlign="SfGridTextAlign.Center" Width="80"
+                                ValidationRules="@(new ValidationRules{ MaxLength = 5, Required = false})">
+                    </GridColumn>
+
+                    <GridColumn Field="IsBlocked" HeaderText="B" HeaderTextAlign="SfGridTextAlign.Center" Width="32">
+                        <Template>
+                            @{
+                                var p = (Apu)context;
+                                if (p.ItemId is >= 1 and <= 999)
+                                {
+                                    @if (Liu.IsAdministrator || Liu.IsSupervisor)
+                                    {
+                                        <input class="csr-ptr" style="width: 18px; height: 18px; margin-top: 5px;" type="checkbox" checked="@p.IsBlocked" @oninput="@(() => UpdateApuBlock(p))" />
+                                    }
+                                    else
+                                    {
+                                        <input class="csr-ptr" style="width: 18px; height: 18px; margin-top: 5px;" type="checkbox" checked="@p.IsBlocked" disabled />
+                                    }
+                                }
+                            }
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="Status" HeaderText="Status" HeaderTextAlign="SfGridTextAlign.Center" Width="125">
+                        <Template>
+                            @{
+                                var p = (Apu)context;
+                                if (p.ItemId is >= 1 and <= 999)
+                                {
+                                    var bgcss = p.StatusId switch
+                                    {
+                                        2 => "bg-clr-lightyellow",
+                                        3 => "bg-clr-lightgreen",
+                                        _ => ""
+                                    };
+
+                                    @if (CanModifyBlockedApu(p))
+                                    {
+                                        <SfDropDownList CssClass="@bgcss" TValue="int" TItem="ApuStatus" DataSource="@ApuStatusDefinitions.Collection" Value="@p.StatusId" AllowFiltering="false">
+                                            <DropDownListEvents TValue="int" TItem="ApuStatus" OnValueSelect="@((arg) => SfDropDownApuStatus_OnValueSelect(arg, p))" />
+                                            <DropDownListFieldSettings Value="@nameof(ApuStatus.Id)" Text="@nameof(ApuStatus.Name)"/>
+                                        </SfDropDownList>
+                                    }
+                                    else
+                                    {
+                                        <div style="height: 30px; display: flex; border-radius: 4px; padding-left: 8px;" class="@bgcss">
+                                            <span class="my-auto">@(p.Status?.Name)</span>
+                                        </div>
+                                    }
+                                }
+                            }
+                        </Template>
+                    </GridColumn>
+
+                    <GridColumn Field="Description" HeaderText="Description" HeaderTextAlign="SfGridTextAlign.Center" Width="400">
+                        <Template>
+                            <span class="spantextbox estimate-item-description" role="textbox" contenteditable @onkeypress:preventDefault>
+                                @(((Apu)context).Description)
+                            </span>
+                        </Template>
+                    </GridColumn>
+                
+                    <GridColumn Field="Unit" HeaderText="Unit" HeaderTextAlign="SfGridTextAlign.Center" Width="80" />
+
+                    <GridColumn Field="Quantity" HeaderText="Qty" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).Quantity.ToString("N2"))</span>
+                        </Template>
+                        <EditTemplate>
+                            <SfNumericTextBox CssClass="sf-ntb-align-right" @bind-Value="@(((Apu)context).Quantity)" Placeholder="Qty" Min="0" Format="n" ShowSpinButton="false"/>
+                        </EditTemplate>
+                    </GridColumn>
+                    
+                    @*01*@
+                    <GridColumn Field="LaborSum.Total" HeaderText="Unit Labor" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).LaborSum.Total.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="LaborSum.TotalExtend" HeaderText="Labor Subtotal" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).LaborSum.TotalExtend.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="MaterialSum.Total" HeaderText="Unit Material" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).MaterialSum.Total.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="MaterialSum.TotalExtend" HeaderText="Material Subtotal" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="110">
+                        <Template>
+                            <span>@(((Apu)context).MaterialSum.TotalExtend.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="EquipmentSum.Total" HeaderText="Unit Equipment" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).EquipmentSum.Total.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="EquipmentSum.TotalExtend" HeaderText="Equipment Subtotal" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).EquipmentSum.TotalExtend.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="ContractSum.Total" HeaderText="Unit Contract" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).ContractSum.Total.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="ContractSum.TotalExtend" HeaderText="Contract Subtotal" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="110">
+                        <Template>
+                            <span>@(((Apu)context).ContractSum.TotalExtend.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="Sum.Total" HeaderText="Price" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            @{
+                                var apu = (Apu)context;
+                                if (apu.GroupId == 1000 && apu.ItemId == 1004)
+                                {
+                                    <span>@SelectedProject?.Bond.ToPercentage()</span>
+                                }
+                                else
+                                {
+                                    <span>@(apu.Sum.Total.ToString("C", new CultureInfo("en-US")))</span>
+                                }
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="Sum.TotalExtend" HeaderText="Total Price" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            @{
+                                var apu = (Apu)context;
+                            }
+                            <span>@(apu.Sum.TotalExtend.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    @*02*@
+                    <GridColumn Field="LaborSum.TotalProRate" HeaderText="Unit Labor" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).LaborSum.TotalProRate.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="LaborSum.TotalExtendProRate" HeaderText="Labor Subtotal" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            <span>@(((Apu)context).LaborSum.TotalExtendProRate.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="MaterialSum.TotalProRate" HeaderText="Unit Material" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).MaterialSum.TotalProRate.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="MaterialSum.TotalExtendProRate" HeaderText="Material Subtotal" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            <span>@(((Apu)context).MaterialSum.TotalExtendProRate.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="EquipmentSum.TotalProRate" HeaderText="Unit Equipment" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).EquipmentSum.TotalProRate.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="EquipmentSum.TotalExtendProRate" HeaderText="Equipment Subtotal" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            <span>@(((Apu)context).EquipmentSum.TotalExtendProRate.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="ContractSum.TotalProRate" HeaderText="Unit Contract" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).ContractSum.TotalProRate.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="ContractSum.TotalExtendProRate" HeaderText="Contract Subtotal" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            <span>@(((Apu)context).ContractSum.TotalExtendProRate.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+
+                    <GridColumn Field="Sum.TotalProRate" HeaderText="Pro Rate Price" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            @{
+                                var apu = (Apu)context;
+                                if (apu.GroupId == 1000 && apu.ItemId == 1004)
+                                {
+                                    <span>@SelectedProject?.Bond.ToPercentage()</span>
+                                }
+                                else
+                                {
+                                    <span>@(apu.Sum.TotalProRate.ToString("C", new CultureInfo("en-US")))</span>
+                                }
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="Sum.TotalExtendProRate" HeaderText="Total Pro Rate" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            @{
+                                var apu = (Apu)context;
+                            }
+                            <span>@(apu.Sum.TotalExtendProRate.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    @*03*@
+                    <GridColumn Field="LaborSum.SubTotalSuperVision" HeaderText="Unit Labor" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="90">
+                        <Template>
+                            <span>@(((Apu)context).LaborSum.SubTotalSuperVision.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="LaborSum.SubTotalSuperVisionExtend" HeaderText="Labor Cost Sub-Total" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            <span>@(((Apu)context).LaborSum.SubTotalSuperVisionExtend.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="MaterialSum.SubTotalSalesTotal" HeaderText="Unit Cost Material" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).MaterialSum.SubTotalSalesTotal.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="MaterialSum.SubTotalSalesTotalExtend" HeaderText="Material Cost Sub-Total" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            <span>@(((Apu)context).MaterialSum.SubTotalSalesTotalExtend.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="EquipmentSum.SubTotal" HeaderText="Unit Cost Equipment" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).EquipmentSum.SubTotal.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="EquipmentSum.SubTotalExtend" HeaderText="Equip. Cost Sub-Total" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            <span>@(((Apu)context).EquipmentSum.SubTotalExtend.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="ContractSum.SubTotal" HeaderText="Unit Cost Contract" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100">
+                        <Template>
+                            <span>@(((Apu)context).ContractSum.SubTotal.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="ContractSum.SubTotalExtend" HeaderText="Contract Cost Sub-Total" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            <span>@(((Apu)context).ContractSum.SubTotalExtend.ToString("C", new CultureInfo("en-US")))</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="Sum.SubTotal" HeaderText="Unit Cost" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="110">
+                        <Template>
+                            @{
+                                var apu = (Apu)context;
+                                if (apu.IsGroup1000Item1004)
+                                {
+                                    <span>@SelectedProject?.Bond.ToPercentage()</span>
+                                }
+                                else if (apu.IsGroup1000Item1005)
+                                {
+                                    <span>@(((Apu)context).Sum.GrossTotalPct.ToString("N2") + "%")</span>
+                                }
+                                else
+                                {
+                                    <span>@(apu.Sum.SubTotal.ToString("C", new CultureInfo("en-US")))</span>
+                                }
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="Sum.SubTotalExtend" HeaderText="Cost Sub-Total" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="125">
+                        <Template>
+                            @{
+                                var apu = (Apu)context;
+                                <span>@(apu.Sum.SubTotalExtend.ToString("C", new CultureInfo("en-US")))</span>
+                            }
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="Sum.GrossTotalPct" HeaderText="Gross" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Right" Width="100" AllowEditing="false">
+                        <Template>
+                            <span>@(((Apu)context).Sum.GrossTotalPct.ToString("N2") + "%")</span>
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="LastUpdatedAt" HeaderText="Date" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center" Width="130" Type="@ColumnType.Date" Format="d" AllowEditing="false"/>
+                    <GridColumn Field="LastUpdatedBy.Monogram" HeaderText="User" HeaderTextAlign="SfGridTextAlign.Center" TextAlign="@SfGridTextAlign.Center" Width="100" AllowEditing="false"/>
+
+                </GridColumns>
+            </SfGrid>
+        </div>
+
+    </div>
+
+</div>

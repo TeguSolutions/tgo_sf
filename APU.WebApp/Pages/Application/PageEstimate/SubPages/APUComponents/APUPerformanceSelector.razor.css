@@ -1,0 +1,28 @@
+﻿.popup-performanceselector {
+    position: absolute;
+    top: 26px;
+    left: -2px;
+    width: 1160px;
+    height: 328px;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 5px;
+
+    text-align: left !important;
+
+    z-index: -1;
+    visibility: collapse;
+    opacity: 0;
+/*    transition: opacity 0.1s ease-in;*/
+}
+
+.popup-performanceselector-show {
+    z-index: 99999;
+    visibility: visible;
+    opacity: 1;
+}

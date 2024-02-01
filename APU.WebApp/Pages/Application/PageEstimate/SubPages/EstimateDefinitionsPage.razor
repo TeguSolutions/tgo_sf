@@ -1,0 +1,210 @@
+﻿@layout AppLayout
+@inherits EstimateDefinitionsVM
+@page "/estimates/definitions"
+
+<PageTitle>Definitions | TechGroupOne</PageTitle>
+
+<div id="definitions-container" class="definitions-container">
+    
+    <DlgConfirmation @ref="@(DialogConfirmationVendorType)" T="VendorType" Target="definitions-container" HeaderText="Delete Confirmation" Width="350px" />
+    <DlgConfirmation @ref="@(DialogConfirmationTrade)" T="Trade" Target="definitions-container" HeaderText="Delete Confirmation" Width="350px" />
+    <DlgConfirmation @ref="@(DialogConfirmationCounty)" T="County" Target="definitions-container" HeaderText="Delete Confirmation" Width="350px" />
+    <DlgConfirmation @ref="@(DialogConfirmationCity)" T="(County, City)" Target="definitions-container" HeaderText="Delete Confirmation" Width="350px" />
+    <DlgConfirmation @ref="@(DialogConfirmationHoliday)" T="Holiday" Target="definitions-container" HeaderText="Delete Confirmation" Width="350px" />
+    
+    <DlgText @ref="@(DialogCityAdd)" T="County" Target="definitions-container" HeaderText="Add City" Width="350px" />
+
+    <div class="definitions-content p-1">
+        
+        @*Vendor Types*@
+        <div class="m-1 definitions-form-container">
+        
+            <h4 class="mt-2 mb-3 text-center">Vendor Types</h4>
+            
+            <div class="d-flex mb-2">
+                <SfTextBox CssClass="me-1" @bind-Value="@NewVendorTypeName" Placeholder="Vendor Type Name" />
+                <SfButton IconCss="e-icons e-icon-plus" @onclick="@AddVendorType"/>
+            </div>
+            
+            <hr />
+
+            <div class="d-flex flex-column" style="overflow-y: auto; height: calc(100% - 110px);">
+                @foreach (var vendorType in VendorTypes)
+                {
+                    <div class="d-flex mb-1">
+                        <SfTextBox CssClass="me-1" @bind-Value="@vendorType.Name"/>
+                        <SfButton CssClass="me-1" IconCss="e-icons e-icon-save" @onclick="@(() => UpdateVendorType(vendorType))"/>
+                        <SfButton IconCss="e-icons e-icon-close" @onclick="@(() => DialogConfirmationVendorType.Open("Delete the following Vendor Type?", vendorType.Name, vendorType))" />
+                    </div>
+                }
+            </div>
+
+        </div>
+
+        @*Trades*@
+        <div class="m-1 definitions-form-container">
+
+            <h4 class="mt-2 mb-3 text-center">Trades</h4>
+
+            <div class="d-flex mb-2">
+                <SfTextBox CssClass="me-1" @bind-Value="@NewTradeName" Placeholder="Trade Name" />
+                <SfButton IconCss="e-icons e-icon-plus" @onclick="@AddTrade" />
+            </div>
+
+            <hr />
+
+            <div class="d-flex flex-column" style="overflow-y: auto; height: calc(100% - 110px);">
+                @foreach (var trade in Trades)
+                {
+                    <div class="d-flex mb-1">
+                        <SfTextBox CssClass="me-1" @bind-Value="@trade.Name" />
+                        <SfButton CssClass="me-1" IconCss="e-icons e-icon-save" @onclick="@(() => UpdateTrade(trade))" />
+                        <SfButton IconCss="e-icons e-icon-close" @onclick="@(() => DialogConfirmationTrade.Open("Delete the following Trade?", trade.Name, trade))" />
+                    </div>
+                }
+            </div>
+
+        </div>
+
+        @*Counties & Cities*@
+        <div class="m-1 definitions-form-container">
+        
+            <h4 class="mt-2 mb-3 text-center">Counties & Cities</h4>
+
+            <div class="d-flex mb-2">
+                <SfTextBox CssClass="me-1" @bind-Value="@NewCountyName" Placeholder="County Name" />
+                <SfButton IconCss="e-icons e-icon-plus" @onclick="@AddCounty" />
+            </div>
+
+            <hr />
+
+            <div class="d-flex flex-column" style="overflow-y: auto; height: calc(100% - 110px);">
+                @foreach (var county in Counties)
+                {
+                    <div class="d-flex mb-1">
+                        <SfTextBox CssClass="me-1" @bind-Value="@county.Name" />
+                        <SfTooltip Content="Update County">
+                            <SfButton CssClass="me-1" IconCss="e-icons e-icon-save" @onclick="@(() => UpdateCounty(county))" />
+                        </SfTooltip>
+                        <SfTooltip Content="Add City">
+                            <SfButton CssClass="me-1" IconCss="e-icons e-icon-plus" @onclick="@(() => DialogCityAdd.Open(county))" />
+                        </SfTooltip>
+                        <SfTooltip Content="Delete County">
+                            <SfButton IconCss="e-icons e-icon-close" @onclick="@(() => DialogConfirmationCounty.Open("Delete the following County?", county.Name, county))" />
+                        </SfTooltip>
+                    </div>
+
+                    @foreach (var city in county.Cities)
+                    {
+                        <div class="d-flex ms-3 mb-1">
+                            <SfTextBox CssClass="me-1" @bind-Value="@city.Name" />
+                            <SfButton CssClass="me-1" IconCss="e-icons e-icon-save" @onclick="@(() => UpdateCity((county, city)))" />
+                            <SfButton IconCss="e-icons e-icon-close" @onclick="@(() => DialogConfirmationCity.Open("Delete the following City?", city.Name, (county, city)))" />
+                        </div>
+                    }
+                }
+            </div>
+
+        </div>
+        
+        @*Holidays*@
+        <div class="m-1 definitions-form-container">
+       
+            <h4 class="mt-2 mb-3 text-center">Holidays</h4>
+            
+            <SfDatePicker CssClass="mb-2" TValue="DateOnly" Value="@NewHolidayDate">
+                <DatePickerEvents TValue="DateOnly" ValueChange="@NewHolidayDateChanged"/>
+            </SfDatePicker>
+
+            <div class="d-flex mb-2">
+                
+                <SfTextBox Readonly="true" Value="@NewHoliday.YearText" Enabled="@NewHolidayYear" Placeholder="Year"/>
+                <SfCheckBox CssClass="my-auto ms-1" @bind-Checked="@NewHolidayYear"/>
+                
+                <SfTextBox CssClass="me-1" Readonly="true" Value="@NewHoliday.MonthTextNumber" Placeholder="Month"/>
+                
+                <SfTextBox Readonly="true" Value="@NewHoliday.DayText" Placeholder="Day"/>
+
+            </div>
+            
+            <div class="d-flex mb-2">
+                <SfTextBox CssClass="me-1" @bind-Value="@NewHoliday.Name" Placeholder="Holiday Name" />
+                <SfButton IconCss="e-icons e-icon-plus" @onclick="@AddHoliday" />
+            </div>
+
+            <hr />
+            
+            <div class="d-flex flex-column" style="overflow-y: auto; height: calc(100% - 110px);">
+                
+                <h5 class="m-0">Recurring</h5>
+                <hr class="my-2" />
+
+                @foreach (var holiday in FilteredHolidays.Where(q => q.Year is null))
+                {
+                    <div class="d-flex mb-1">
+                        <div class="" style="margin-right: 3px; min-width: 61px; max-width: 61px;">
+                            <SfTextBox CssClass="" Readonly="true" Value="@holiday.YearText"/>
+                        </div>
+                        <div class="" style="margin-right: 3px; min-width: 44px; max-width: 44px;">
+                            <SfTextBox CssClass="" Readonly="true" Value="@holiday.MonthTextNumber"/>
+                        </div>
+                        <div class="" style="margin-right: 3px; min-width: 44px; max-width: 44px;">
+                            <SfTextBox CssClass="" Readonly="true" Value="@holiday.DayText"/>
+                        </div>
+
+                        <SfButton CssClass="ms-auto" IconCss="e-icons e-icon-close" @onclick="@(() => DialogConfirmationHoliday.Open("Delete the following Holiday?", holiday.Name, holiday))"/>
+                    </div>
+
+                    <div class="d-flex">
+                        <SfTextBox CssClass="me-1" @bind-Value="@holiday.Name"/>
+                        <SfButton CssClass="" IconCss="e-icons e-icon-save" @onclick="@(() => UpdateHoliday(holiday))"/>
+                    </div>
+
+                    <hr/>
+                }
+                
+                <div class="d-flex">
+                    <h5 class="m-0">Fix</h5>
+                    
+                    <SfButtonGroup CssClass="ms-auto my-auto" Mode="SfSplitButtonSelectionMode.Single">
+                        <ButtonGroupButton @bind-Selected="@HolidayFilterThisYear">This Year</ButtonGroupButton>
+                        <ButtonGroupButton @bind-Selected="@HolidayFilterUpcoming">Upcoming</ButtonGroupButton>
+                        <ButtonGroupButton @bind-Selected="@HolidayFilterAll">All</ButtonGroupButton>
+                    </SfButtonGroup>
+                </div>
+              
+                <hr class="my-2"/>
+                
+                @foreach (var holiday in FilteredHolidays.Where(q => q.Year is not null))
+                {
+                    <div class="d-flex mb-1">
+                        <div class="" style="margin-right: 3px; min-width: 61px; max-width: 61px;">
+                            <SfTextBox CssClass="" Readonly="true" Value="@holiday.YearText"/>
+                        </div>
+                        <div class="" style="margin-right: 3px; min-width: 44px; max-width: 44px;">
+                            <SfTextBox CssClass="" Readonly="true" Value="@holiday.MonthTextNumber"/>
+                        </div>
+                        <div class="" style="margin-right: 3px; min-width: 44px; max-width: 44px;">
+                            <SfTextBox CssClass="" Readonly="true" Value="@holiday.DayText"/>
+                        </div>
+
+                        <SfButton CssClass="ms-auto" IconCss="e-icons e-icon-close" @onclick="@(() => DialogConfirmationHoliday.Open("Delete the following Holiday?", holiday.Name, holiday))"/>
+                    </div>
+
+                    <div class="d-flex">
+                        <SfTextBox CssClass="me-1" @bind-Value="@holiday.Name"/>
+                        <SfButton CssClass="" IconCss="e-icons e-icon-save" @onclick="@(() => UpdateHoliday(holiday))"/>
+                    </div>
+
+                    <hr/>
+                }
+
+            </div>
+            
+
+        </div>
+
+    </div>
+
+</div>
+

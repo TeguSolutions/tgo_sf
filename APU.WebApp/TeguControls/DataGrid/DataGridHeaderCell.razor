@@ -1,0 +1,20 @@
+﻿@namespace Tegu.Blazor.Controls
+@typeparam T
+@inherits DataGridHeaderCellVM<T>
+
+<div id="@Id" class="grid-headercell @Column.HeaderTextAlign.Name" style="@WidthStyle">
+    @{
+        if (Column.HeaderTemplate is not null)
+        {
+            @Column.HeaderTemplate
+        }
+        else if (!string.IsNullOrWhiteSpace(Column.Header))
+        {
+            <span class="grid-headercell-span">@Column.Header</span>
+        }
+        else
+        {
+            <span class="grid-headercell-span">@Column.Field</span>
+        }
+    }
+</div>

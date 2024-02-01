@@ -1,0 +1,779 @@
+﻿@layout AppLayout
+@inherits APUPageVM
+@page "/estimates/apu"
+
+<PageTitle>Estimates - APU | TechGroupOne</PageTitle>
+
+<div id="apu-container" class="apu-container">
+    
+    <DlgPerformanceManager @ref="@PerformanceManager" Target="apu-container"/>
+    <DlgLaborManager @ref="@LaborManager" Target="apu-container"/>
+    <DlgMaterialManager @ref="@MaterialManager" Target="apu-container"/>
+    <DlgEquipmentManager @ref="@EquipmentManager" Target="apu-container"/>
+    <DlgContractManager @ref="@ContractManager" Target="apu-container"/>
+
+    <div class="d-flex mb-2" style="margin-inline: auto; max-width: 1200px;">
+        <SfCheckBox TChecked="bool?" CssClass="my-auto e-customsize me-1" Checked="@IsBlocked" Indeterminate="@(IsBlocked == null)" Label="B:" 
+                    LabelPosition="@ButtonLabelPosition.Before" @onclick="@IsBlockedChanged" />
+
+        <SfComboBox @ref="@SfCbProjectFilter" TValue="Guid?" TItem="ProjectModel" CssClass="me-1" Width="350px" Placeholder="Select a Project"
+                    AllowFiltering="true"
+                    DataSource="@FilteredProjectModels" Value="@SelectedProject?.Id">
+            <ComboBoxFieldSettings Value="@nameof(ProjectModel.Id)" Text="@nameof(ProjectModel.ProjectName)" />
+            <ComboBoxEvents TValue="Guid?" TItem="ProjectModel" Filtering="ProjectFilterChanged" ValueChange="@SelectedProjectCBChanged"/>
+        </SfComboBox>
+
+        <SfComboBox @ref="@SfCbApus" TValue="Guid?" TItem="Apu" CssClass="me-1" Width="350px" Placeholder="Select Apu"
+                    AllowFiltering="true"
+                    DataSource="@SelectedProject?.Apus" Value="@Apu?.Id" >
+            <ComboBoxFieldSettings Value="@nameof(Apu.Id)" Text="@nameof(Apu.GroupItemDescriptionText)" />
+            <ComboBoxEvents TValue="Guid?" TItem="Apu" ValueChange="@SelectedApuCBChanged"/>
+        </SfComboBox>
+
+        <SfButton CssClass="me-1" Content="Prev" @onclick="@TrySelectPreviousApu"/>        
+        <SfButton CssClass="me-1" Content="Next" @onclick="@(() => TrySelectNextApu(true))"/>
+
+        <SfButton CssClass="ms-auto" Content="Export Project As Pdf" @onclick="@ExportProject" Disabled="@IsLoading"/>
+    </div>
+
+    @* Item Description *@
+    <table class="table table-bordered tab mb-2 @(Apu is null || CanEdit == false ? "tab-block" : "")">
+        <thead>
+            <tr>
+                <th style="width: 40px;">No</th>
+                <th style="width: 560px; position: relative;">
+                    Item Description
+                    <APUSelector @ref="@ApuSelectorRef"/>
+                </th>
+                <th style="width: 100px;">Und.</th>
+                <th style="width: 100px;">Qty</th>
+                <th style="width: 100px;">Status</th>
+                <th style="width: 100px;">Calculations</th>
+                <th style="width: 200px;"></th>
+            </tr>
+        </thead>
+        
+        <tbody>
+            @if (Apu is not null)
+            {
+                <tr>
+                    <td class="text-center" style="padding: 0 !important;">
+                        <SfTooltip Content="Select and Copy existing APU" Position="@Position.RightCenter">
+                            <div class="div-no-btn" @onclick="@ApuSelectorToggle">
+                                <SfIcon IconCss="m-auto" Name="@IconName.Search" Size="@IconSize.Medium"/>
+                            </div>
+                        </SfTooltip>
+                    </td>
+
+                    <td class="text-start " style="padding: 0 !important;">
+                        <span class="spantextbox apu-item-description" role="textbox" contenteditable @onkeypress:preventDefault>
+                            @Apu.Description
+                        </span>
+                    </td>
+
+                    <td class="text-center">@Apu.Unit</td>
+                    <td>
+                        <span>@Apu.Quantity.ToString("N2")</span>
+                    </td>
+                    
+                    @if (Apu.ItemId is >= 1 and <= 999)
+                    {
+                        var bgcss = Apu.Status.Id switch
+                        {
+                            2 => "bg-clr-lightyellow",
+                            3 => "bg-clr-lightgreen",
+                            _ => ""
+                            };
+
+                        <td class="@bgcss" style="padding: 0 !important;">
+                            <SfDropDownList Readonly="@(!CanEdit)" CssClass="@(bgcss + " b-none br-0 fs-13px")" TValue="int" TItem="ApuStatus" DataSource="@ApuStatuses" Value="@(Apu.StatusId)" AllowFiltering="false">
+                                <DropDownListFieldSettings Value="@nameof(ApuStatus.Id)" Text="@nameof(ApuStatus.Name)"/>
+                                <DropDownListEvents TValue="int" TItem="ApuStatus" OnValueSelect="@SfDropDownApuStatus_OnValueSelect" />
+                            </SfDropDownList>
+                        </td>
+                    }
+
+                    <td style="padding: 0 !important;">
+                        @if (string.IsNullOrWhiteSpace(SelectedProject?.Link))
+                        {
+                            <SfButton CssClass="b-none br-0 w-100 h-100" IconCss="e-icons e-icon-link" Disabled="true" />
+                        }
+                        else
+                        {
+                            <SfTooltip Content="@SelectedProject.Link">
+                                <SfButton CssClass="b-none br-0 w-100 h-100" IconCss="e-icons e-icon-link" @onclick="@(() => JS.OpenUrlInNewTab(SelectedProject.Link))" />
+                            </SfTooltip>
+                        }
+                    </td>
+                    <td></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+    @* Performance *@
+    <table class="table table-bordered tab mb-2 @(Apu is null || CanEdit == false ? "tab-block" : "")">
+        <thead>
+            <tr>
+                <th class="clickable" style="width: 40px; padding: 0 !important;">
+                    <div @onclick="@OpenPerformanceManagerForCreate">
+                        <SfIcon IconCss="m-auto" Name="@IconName.Plus" Size="@IconSize.Medium"/>
+                    </div>
+                </th>
+                <th class="clickable d-flex" style="height: 26.2px; width: 560px; position: relative;" @onclick="@PerformanceSelectorToggle">
+                    <span class="mx-auto">Performance</span>
+                    <div class="my-auto" style="width: 29px;">
+                        <SfIcon IconCss="e-icons e-icon-search"></SfIcon>
+                    </div>
+                    <APUPerformanceSelector @ref="@PerformanceSelectorRef"/>
+                </th>
+                <th style="width: 100px;">Perf.</th>
+                <th style="width: 100px;">Hours</th>
+                <th style="width: 100px;">Hrs/Und.</th>
+                <th style="width: 100px;">Und/Days</th>
+                <th style="width: 100px;">Tot. Hours</th>
+                <th style="width: 100px;">Tot. Days</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Apu is not null)
+            {
+                <tr>
+                    <td class="text-center" style="padding: 0 !important;">
+                        <div class="div-no-btn" @onclick="@OpenPerformanceManagerForUpdateMix">
+                            <SfIcon IconCss="m-auto" Name="@IconName.Edit" Size="@IconSize.Medium"/>
+                        </div>
+                    </td>
+                    <td class="position-relative bg-lightblue d-flex" style="padding: 0 !important; text-align: left !important;">
+
+                        <span class="spantextbox apu-item-description bg-lightblue" role="textbox" contenteditable @onkeypress:preventDefault>
+                            @Apu.Performance?.Description
+                        </span>
+                        
+                        @if (CanEdit)
+                        {
+                            <SfButton CssClass="b-none br-0 w-39px bg-lightblue" IconCss="e-icons e-icon-close" 
+                                      @onclick="@ApuPerformanceRemoveAsync"
+                                      @onpointerdown="@PerformanceSelectorClose" />
+                        }
+                    </td>
+                    <td>@Apu?.Performance?.Value.ToN2()</td>
+                    <td>@Apu?.Performance?.Hours.ToN4()</td>
+                    <td>@Apu?.Performance?.HoursPerUnits.ToN4()</td>
+                    <td>@Apu?.Performance?.UnitDays.ToN2()</td>
+                    <td>@Apu?.Performance?.TotalHours.ToN2()</td>
+                    <td>@Apu?.Performance?.TotalDays.ToN2()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @* Labor *@
+    <table class="table table-bordered tab mb-2 @(Apu is null || CanEdit == false ? "tab-block" : "")">
+        <thead>
+            <tr>
+                <th class="clickable" style="width: 40px; padding: 0 !important;">
+                    <div @onclick="@LaborManagerOpenCreate">
+                        <SfIcon IconCss="m-auto" Name="@IconName.Plus" Size="@IconSize.Medium"/>
+                    </div>
+                </th>
+                <th class="clickable d-flex" style="height: 26.2px; width: 560px; position: relative;" @onclick="@LaborSelectorToggle">
+                    <span class="mx-auto">Labors</span>
+                    <div class="my-auto" style="width: 29px;">
+                        <SfIcon IconCss="e-icons e-icon-search"></SfIcon>
+                    </div>
+                    <APULaborSelector @ref="@LaborSelectorRef"/>
+                </th>
+                <th style="width: 100px;">Salary</th>
+                <th style="width: 100px;">Lab. Cost</th>
+                <th style="width: 100px;">Qty</th>
+                <th style="width: 100px;">Und/Hrs</th>
+                <th style="width: 100px;">Total</th>
+                <th style="width: 100px;">T. Extnd.</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Apu is not null)
+            {
+                for (var i = 0; i < Apu.ApuLabors.Count; i++)
+                {
+                    var labor = Apu.ApuLabors[i];
+
+                    <tr>
+                        <td class="text-center" style="padding: 0 !important;">
+                            <div class="div-no-btn" @onclick="@(() => LaborManagerOpenUpdateMix(labor))">
+                                <span class="m-auto fs-0p9rem">@(i + 1)</span>
+                            </div>
+                        </td>
+                        <td class="position-relative bg-lightblue d-flex" style="padding: 0 !important; text-align: left !important;">
+
+                            <span class="spantextbox apu-item-description bg-lightblue" role="textbox" contenteditable @onkeypress:preventDefault>
+                                @labor.Description
+                            </span>
+
+                            @if (CanEdit)
+                            {
+                                <SfButton Disabled="@(!CanEdit)" CssClass="b-none br-0 w-39px bg-lightblue" IconCss="e-icons e-icon-close"
+                                @onclick="@(() => ApuLaborRemove(labor))"
+                                @onpointerdown="@LaborSelectorClose" />
+                            }
+                        </td>
+                        <td>@labor.Salary.ToDollar()</td>
+                        <td>@labor.Cost.ToDollar()</td>
+                        <td class="bg-lightblue" style="padding: 0 !important;">
+                            <SfNumericTextBox Readonly="@(!CanEdit)" TValue="decimal" CssClass="sf-ntb-align-right fs-0p8rem bg-lightblue b-none br-0"
+                                              Value="@labor.Quantity" ValueChanged="@((arg) => ApuLaborQuantityChanged(labor, arg))"
+                            @onfocusout="@(() => ApuLaborUpdateQuantity(labor))"
+                                              Min="0" Format="n" ShowSpinButton="false" />
+                        </td>
+                        <td class="bg-lightblue" style="padding: 0 !important;">
+                            <SfDropDownList Readonly="@(!CanEdit)" CssClass="bg-lightblue b-none br-0" TValue="int" TItem="LaborWorkType" DataSource="@LaborWorkTypes" AllowFiltering="false"
+                                            Value="@labor.WorkTypeId">
+                                <DropDownListFieldSettings Value="@nameof(LaborWorkType.Id)" Text="@nameof(LaborWorkType.Name)" />
+                                <DropDownListEvents TValue="int" TItem="LaborWorkType" OnValueSelect="@((arg) => SfDropDownApuLaborWorkType_OnValueSelect(arg, labor))" />
+                            </SfDropDownList>
+                        </td>
+                        <td>@labor.Total.ToDollar()</td>
+                        <td>@labor.TotalExtend.ToDollar()</td>
+                    </tr>
+                }
+
+                @* E1 *@
+                <tr>
+                    <td colspan="3" style="text-align: left;">Labor Notes</td>
+                    <td colspan="3">Sub-Total Labor:</td>
+                    <td>@Apu?.LaborSum.SubTotal.ToDollar()</td>
+                    <td>@Apu?.LaborSum.SubTotalExtend.ToDollar()</td>
+                </tr>
+                @* E2 *@
+                <tr>
+                    <td colspan="3" rowspan="4" style="padding: 0 !important; vertical-align: top !important;">
+                        @if (CanEdit)
+                        {
+                            <SfTextBox CssClass="b-none br-0" Multiline="true" @bind-Value="@Apu.LaborNotes"
+                                       HtmlAttributes="@(new Dictionary<string, object> { { "rows", 4 } })"
+                                       @onfocusout="ApuUpdateLaborNotes"/>
+                        }
+                        else
+                        {
+                            <span class="spantextarea apu-item-note" role="textbox" contenteditable @onkeypress:preventDefault>
+                                @Apu.LaborNotes
+                            </span>
+                        }
+                    </td>
+                    <td colspan="2">Supervision:</td>
+                    <td class="bg-lightblue" style="padding: 0 !important;">
+                        <div class="d-flex">
+                            <SfNumericTextBox Readonly="@(!CanEdit)" TValue="decimal" CssClass="sf-ntb-align-right fs-0p8rem bg-lightblue b-none br-0"
+                                              Value="@Apu.SuperPercentage" ValueChanged="@ApuLaborSuperPctChanged"
+                                              @onfocusout="@ApuUpdateLaborSuperPct"
+                                              Min="0" Format="n" ShowSpinButton="false"/>
+                            <span class="my-auto me-1">%</span>
+                        </div>
+                    </td>
+                    <td>@Apu?.LaborSum.SuperVision.ToDollar()</td>
+                    <td>@Apu?.LaborSum.SuperVisionExtend.ToDollar()</td>
+                </tr>
+                @* E3 *@
+                <tr>
+                    <td colspan="3" class="bg-darkblue">Sub-Total Labor & Supervision:</td>
+                    <td class="bg-darkblue">@Apu?.LaborSum.SubTotalSuperVision.ToDollar()</td>
+                    <td class="bg-darkblue">@Apu?.LaborSum.SubTotalSuperVisionExtend.ToDollar()</td>
+                </tr>
+                @* E4 *@
+                <tr>
+                    <td colspan="2">Gross Margin Labor:</td>
+                    <td class="bg-lightblue" style="padding: 0 !important;">
+                        <div class="d-flex">
+                            <SfNumericTextBox Readonly="@(!CanEdit)" TValue="decimal" CssClass="sf-ntb-align-right fs-0p8rem bg-lightblue b-none br-0"
+                                              Value="@Apu.LaborGrossPercentage" ValueChanged="@ApuLaborGrossPctChanged"
+                                              @onfocusout="@ApuUpdateLaborGrossPct"
+                                              Min="0" Format="n" ShowSpinButton="false"/>
+                            <span class="my-auto me-1">%</span>
+                        </div>
+                    </td>
+                    <td class="">@Apu?.LaborSum.GrossTotal.ToDollar()</td>
+                    <td class="">@Apu?.LaborSum.GrossTotalExtend.ToDollar()</td>
+                </tr>
+                @* E5 *@
+                <tr>
+                    <td colspan="3" class="bg-yellow">Total Labor & Supervision:</td>
+                    <td class="bg-yellow">@Apu?.LaborSum.Total.ToDollar()</td>
+                    <td class="bg-yellow">@Apu?.LaborSum.TotalExtend.ToDollar()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @* Material *@
+    <table class="table table-bordered tab mb-2 @(Apu is null || CanEdit == false ? "tab-block" : "")">
+        <thead>
+            <tr>
+                <th class="clickable" style="width: 40px; padding: 0 !important;">
+                    <div @onclick="@(() => MaterialManager.Open(ManagerOpenMode.Create, null))">
+                        <SfIcon IconCss="m-auto" Name="@IconName.Plus" Size="@IconSize.Medium"/>
+                    </div>
+                </th>
+                <th class="clickable d-flex" style="height: 26.2px; width: 420px; position: relative;" @onclick="@MaterialSelectorToggle">
+                    <span class="mx-auto">Materials</span>
+                    <div class="my-auto" style="width: 29px;">
+                        <SfIcon IconCss="e-icons e-icon-search"></SfIcon>
+                    </div>
+                    <APUMaterialSelector @ref="@MaterialSelectorRef"/>
+                </th>
+                <th style="width: 40px;">S</th>
+                <th style="width: 100px;">Tot/Und</th>
+                <th style="width: 100px;">Und</th>
+                <th style="width: 100px;">Qty</th>
+                <th style="width: 100px;">Waste</th>
+                <th style="width: 100px;">Price</th>
+                <th style="width: 100px;">Total</th>
+                <th style="width: 100px;">T. Extend.</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Apu is not null)
+            {
+                for (var i = 0; i < Apu.ApuMaterials.Count; i++)
+                {
+                    var material = Apu.ApuMaterials[i];
+
+                    <tr>
+                        <td class="text-center" style="padding: 0 !important;">
+                            <div class="div-no-btn" @onclick="@(() => MaterialManager.Open(ManagerOpenMode.UpdateMix, material))">
+                                <span class="m-auto fs-0p9rem">@(i + 1)</span>
+                            </div>
+                        </td>
+                        <td class="position-relative bg-lightblue d-flex" style="padding: 0 !important;">
+
+                            <span class="spantextbox apu-item-description bg-lightblue" role="textbox" contenteditable @onkeypress:preventDefault>
+                                @material.Description
+                            </span>
+
+                            @if (CanEdit)
+                            {
+                                <SfButton CssClass="b-none br-0 w-39px bg-lightblue" IconCss="e-icons e-icon-close"
+                                          @onclick="@(() => ApuMaterialRemove(material))"
+                                          @onpointerdown="@MaterialSelectorClose"/>
+                            }
+                        </td>
+                        <td class="pointer-events-all" style="text-align: center; padding: 0 !important;">
+                            @if (string.IsNullOrWhiteSpace(material.Link))
+                            {
+                                <SfButton CssClass="b-none br-0 w-39px" IconCss="e-icons e-icon-link" Disabled="true" />
+                            }
+                            else
+                            {
+                                <SfTooltip Content="@material.Link">
+                                    <SfButton CssClass="b-none br-0 w-39px" IconCss="e-icons e-icon-link" @onclick="@(() => JS.OpenUrlInNewTab(material.Link))" />
+                                </SfTooltip>
+                            }
+                        </td>
+                        <td class="bg-lightblue" style="padding: 0 !important;">
+                            <SfDropDownList Readonly="@(!CanEdit)" CssClass="bg-lightblue b-none br-0" TValue="int" TItem="ItemType" DataSource="@ItemTypes" AllowFiltering="false"
+                                            Value="@material.ItemTypeId">
+                                    <DropDownListFieldSettings Value="@nameof(ItemType.Id)" Text="@nameof(ItemType.Name)"/>
+                                    <DropDownListEvents TValue="int" TItem="ItemType" OnValueSelect="@((arg) => SfDropDownApuMaterialItemType_OnValueSelect(arg, material))"/>
+                            </SfDropDownList>
+                        </td>
+                        <td class="text-center">@material.Unit</td>
+                        <td class="bg-lightblue" style="padding: 0 !important;">
+                            <SfNumericTextBox Readonly="@(!CanEdit)" TValue="decimal" CssClass="sf-ntb-align-right fs-0p8rem bg-lightblue b-none br-0"
+                                              Value="@material.Quantity" ValueChanged="@((arg) => ApuMaterialQuantityChanged(arg, material))"
+                                              @onfocusout="@(() => ApuMaterialUpdateQuantity(material))"
+                                              Min="0" Format="n" ShowSpinButton="false"/>
+                        </td>
+                        <td class="bg-lightblue" style="padding: 0 !important;">
+                            <div class="d-flex">
+                                <SfNumericTextBox Readonly="@(!CanEdit)" TValue="decimal" CssClass="sf-ntb-align-right fs-0p8rem bg-lightblue b-none br-0"
+                                                  Value="@material.Waste" ValueChanged="@((arg) => ApuMaterialWasteChanged(arg, material))"
+                                                  @onfocusout="@(() => ApuMaterialUpdateWaste(material))"
+                                                  Min="0" Format="n" ShowSpinButton="false"/>
+                                <span class="my-auto me-1">%</span>
+                            </div>
+                        </td>
+                        <td>@material.Price.ToDollar()</td>
+                        <td>@material.Total.ToDollar()</td>
+                        <td>@material.TotalExtend.ToDollar()</td>
+                    </tr>
+                }
+
+                @* E1 *@
+                <tr>
+                    <td colspan="5" style="text-align: left;">Material Notes</td>
+                    <td colspan="3">Sub-Total Materials:</td>
+                    <td>@Apu?.MaterialSum.SubTotal.ToDollar()</td>
+                    <td>@Apu?.MaterialSum.SubTotalExtend.ToDollar()</td>
+                </tr>
+                @* E2 *@
+                <tr>
+                    <td colspan="5" rowspan="4" class="text-left" style="padding: 0 !important; vertical-align: top !important;">
+                        @if (CanEdit)
+                        {
+                            <SfTextBox CssClass="b-none br-0" Multiline="true" @bind-Value="@Apu.MaterialNotes"
+                                       HtmlAttributes="@(new Dictionary<string, object> { { "rows", 4 } })"
+                                       @onfocusout="@ApuUpdateMaterialNotes"/>
+                        }
+                        else
+                        {
+                            <span class="spantextarea apu-item-note" role="textbox" contenteditable @onkeypress:preventDefault>
+                                @Apu.MaterialNotes
+                            </span>
+                        }
+                    </td>
+                    <td colspan="2">Sales tax:</td>
+                    <td>@SelectedProject?.SalesTax.ToPercentage()</td>
+                    <td>@Apu?.MaterialSum.SalesTotal.ToDollar()</td>
+                    <td>@Apu?.MaterialSum.SalesTotalExtend.ToDollar()</td>
+                </tr>
+                @* E3 *@
+                <tr>
+                    <td colspan="3" class="bg-darkblue">Sub-Total Material with SalesTax:</td>
+                    <td class="bg-darkblue">@Apu?.MaterialSum.SubTotalSalesTotal.ToDollar()</td>
+                    <td class="bg-darkblue">@Apu?.MaterialSum.SubTotalSalesTotalExtend.ToDollar()</td>
+                </tr>
+                @* E4 *@
+                <tr>
+                    <td colspan="2">Gross Margin Material:</td>
+                    <td class="bg-lightblue" style="padding: 0 !important;">
+                        <div class="d-flex">
+                            <SfNumericTextBox Readonly="@(!CanEdit)" TValue="decimal" CssClass="sf-ntb-align-right fs-0p8rem bg-lightblue b-none br-0"
+                                              Value="@Apu.MaterialGrossPercentage" ValueChanged="@ApuMaterialGrossPctChanged"
+                                              @onfocusout="@ApuUpdateMaterialGrossPct"
+                                              Min="0" Format="n" ShowSpinButton="false"/>
+                            <span class="my-auto me-1">%</span>
+                        </div>
+                    </td>
+                    <td>@Apu?.MaterialSum.GrossTotal.ToDollar()</td>
+                    <td>@Apu?.MaterialSum.GrossTotalExtend.ToDollar()</td>
+                </tr>
+                @* E5 *@
+                <tr>
+                    <td colspan="3" class="bg-yellow">Total Materials:</td>
+                    <td class="bg-yellow">@Apu?.MaterialSum.Total.ToDollar()</td>
+                    <td class="bg-yellow">@Apu?.MaterialSum.TotalExtend.ToDollar()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @* Equipment *@
+    <table class="table table-bordered tab mb-2 @(Apu is null || CanEdit == false ? "tab-block" : "")">
+        <thead>
+            <tr>
+                <th class="clickable" style="width: 40px; padding: 0 !important;">
+                    <div @onclick="@(() => EquipmentManager.Open(ManagerOpenMode.Create, null))">
+                        <SfIcon IconCss="m-auto" Name="@IconName.Plus" Size="@IconSize.Medium"/>
+                    </div>
+                </th>
+                <th class="clickable d-flex" style="height: 26.2px; width: 520px; position: relative;" @onclick="@EquipmentSelectorToggle">
+                    <span class="mx-auto">Equipments</span>
+                    <div class="my-auto" style="width: 29px;">
+                        <SfIcon IconCss="e-icons e-icon-search"></SfIcon>
+                    </div>
+                    <APUEquipmentSelector @ref="@EquipmentSelectorRef"/>
+                </th>
+                <th style="width: 40px;">S</th>
+                <th style="width: 100px;">Tot./Und</th>
+                <th style="width: 100px;">Und</th>
+                <th style="width: 100px;">Qty</th>
+                <th style="width: 100px;">Price</th>
+                <th style="width: 100px;">Total</th>
+                <th style="width: 100px;">T. Extend.</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Apu is not null)
+            {
+                @* Equipment Small Tools *@
+                <tr>
+                    <td colspan="3"></td>
+                    <td class="">Small Tools:</td>
+                    <td class=""></td>
+                    <td class="">@SelectedProject?.Tools.ToPercentage()</td>
+                    <td class=""></td>
+                    <td class="">@Apu?.EquipmentSmallTools.Total.ToDollar()</td>
+                    <td class="">@Apu?.EquipmentSmallTools.TotalExtend.ToDollar()</td>
+                </tr>
+
+                for (var i = 0; i < Apu.ApuEquipments.Count; i++)
+                {
+                    var equipment = Apu.ApuEquipments[i];
+
+                    <tr>
+                        <td class="text-center" style="padding: 0 !important;">
+                            <div class="div-no-btn" @onclick="@(() => EquipmentManager.Open(ManagerOpenMode.UpdateMix, equipment))">
+                                <span class="m-auto fs-0p9rem">@(i + 1)</span>
+                            </div>
+                        </td>
+                        <td class="position-relative bg-lightblue d-flex" style="padding: 0 !important; text-align: left !important;">
+
+                            <span class="spantextbox apu-item-description bg-lightblue" role="textbox" contenteditable @onkeypress:preventDefault>
+                                @equipment.Description
+                            </span>
+
+                            @if (CanEdit)
+                            {
+                                <SfButton CssClass="b-none br-0 w-39px bg-lightblue" IconCss="e-icons e-icon-close"
+                                @onclick="@(() => ApuEquipmentRemove(equipment))"
+                                @onpointerdown="@EquipmentSelectorClose" />
+                            }
+                        </td>
+                        <td class="pointer-events-all" style="text-align: center; padding: 0 !important;">
+                            @if (string.IsNullOrWhiteSpace(equipment.Link))
+                            {
+                                <SfButton CssClass="b-none br-0 w-39px" IconCss="e-icons e-icon-link" Disabled="true" />
+                            }
+                            else
+                            {
+                                <SfTooltip Content="@equipment.Link">
+                                    <SfButton CssClass="b-none br-0 w-39px" IconCss="e-icons e-icon-link" @onclick="@(() => JS.OpenUrlInNewTab(equipment.Link))" />
+                                </SfTooltip>
+                            }
+                        </td>
+                        <td class="bg-lightblue" style="padding: 0 !important;">
+                            <div class="d-flex">
+                                <SfDropDownList Readonly="@(!CanEdit)" CssClass="bg-lightblue b-none br-0" TValue="int" TItem="ItemType" DataSource="@ItemTypes" AllowFiltering="false"
+                                                Value="@equipment.ItemTypeId">
+                                    <DropDownListFieldSettings Value="@nameof(ItemType.Id)" Text="@nameof(ItemType.Name)" />
+                                    <DropDownListEvents TValue="int" TItem="ItemType" OnValueSelect="@((arg) => SfDropDownApuEquipmentItemType_OnValueSelect(arg, equipment))" />
+                                </SfDropDownList>
+                            </div>
+                        </td>
+                        <td style="text-align: center;">@equipment.Unit</td>
+                        <td class="bg-lightblue" style="padding: 0 !important;">
+                            <div class="d-flex">
+                                <SfNumericTextBox Readonly="@(!CanEdit)" TValue="decimal" CssClass="sf-ntb-align-right fs-0p8rem bg-lightblue b-none br-0"
+                                                  Value="@equipment.Quantity" ValueChanged="@((arg) => ApuEquipmentQuantityChanged(arg, equipment))"
+                                @onfocusout="@(() => ApuEquipmentUpdateQuantity(equipment))"
+                                                  Min="0" Format="n" ShowSpinButton="false" />
+                            </div>
+                        </td>
+                        <td>@equipment.Price.ToDollar()</td>
+                        <td>@equipment.Total.ToDollar()</td>
+                        <td>@equipment.TotalExtend.ToDollar()</td>
+                    </tr>
+                }
+
+                @* E1 *@
+                <tr>
+                    <td colspan="4" style="text-align: left;">Equipments Notes:</td>
+                    <td colspan="3" class="bg-darkblue">Sub-Total Equipments:</td>
+                    <td class="bg-darkblue">@Apu?.EquipmentSum.SubTotal.ToDollar()</td>
+                    <td class="bg-darkblue">@Apu?.EquipmentSum.SubTotalExtend.ToDollar()</td>
+                </tr>
+                @* E2 *@
+                <tr>
+                    <td colspan="4" rowspan="2" style="padding: 0 !important; vertical-align: top !important;">
+                        @if (CanEdit)
+                        {
+                            <SfTextBox CssClass="b-none br-0" Multiline="true" @bind-Value="@Apu.EquipmentNotes"
+                                       HtmlAttributes="@(new Dictionary<string, object> { { "rows", 2 } })"
+                                       @onfocusout="@ApuUpdateEquipmentNotes"/>
+                        }
+                        else
+                        {
+                            <span class="spantextarea apu-item-note" role="textbox" contenteditable @onkeypress:preventDefault>
+                                @Apu.EquipmentNotes
+                            </span>
+                        }
+                    </td>
+                    <td colspan="2">Gross Margin Equipments:</td>
+                    <td class="bg-lightblue" style="padding: 0 !important;">
+                        <div class="d-flex">
+                            <SfNumericTextBox Readonly="@(!CanEdit)" TValue="decimal" CssClass="sf-ntb-align-right fs-0p8rem bg-lightblue b-none br-0"
+                                              Value="@Apu.EquipmentGrossPercentage" ValueChanged="@ApuEquipmentGrossPctChanged"
+                                              @onfocusout="@ApuUpdateEquipmentGrossPct"
+                                              Min="0" Format="n" ShowSpinButton="false"/>
+                            <span class="my-auto me-1">%</span>
+                        </div>
+                    </td>
+                    <td class="">@Apu?.EquipmentSum.GrossTotal.ToDollar()</td>
+                    <td class="">@Apu?.EquipmentSum.GrossTotalExtend.ToDollar()</td>
+                </tr>
+                @* E3 *@
+                <tr>
+                    <td colspan="3" class="bg-yellow">Total Equipments:</td>
+                    <td class="bg-yellow">@Apu?.EquipmentSum.Total.ToDollar()</td>
+                    <td class="bg-yellow">@Apu?.EquipmentSum.TotalExtend.ToDollar()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @* Contracts *@
+    <table class="table table-bordered tab mb-2 @(Apu is null || CanEdit == false ? "tab-block" : "")">
+        <thead>
+            <tr>
+                <th class="clickable" style="width: 40px; padding: 0 !important;">
+                    <div @onclick="@(() => ContractManager.Open(ManagerOpenMode.Create, null))">
+                        <SfIcon IconCss="m-auto" Name="@IconName.Plus" Size="@IconSize.Medium"/>
+                    </div>
+                </th>
+                <th class="clickable d-flex" style="height: 26.2px; width: 520px; position: relative;" @onclick="@ContractSelectorToggle">
+                    <span class="mx-auto">Contracts</span>
+                    <div class="my-auto" style="width: 29px;">
+                        <SfIcon IconCss="e-icons e-icon-search"></SfIcon>
+                    </div>
+                    <APUContractSelector @ref="@ContractSelectorRef"/>
+                </th>
+                <th style="width: 40px;">S</th>
+                <th style="width: 100px;">Tot./Und</th>
+                <th style="width: 100px;">Und</th>
+                <th style="width: 100px;">Qty</th>
+                <th style="width: 100px;">Price</th>
+                <th style="width: 100px;">Total</th>
+                <th style="width: 100px;">T. Extend.</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Apu is not null)
+            {
+                for (var i = 0; i < Apu.ApuContracts.Count; i++)
+                {
+                    var contract = Apu.ApuContracts[i];
+
+                    <tr>
+                        <td class="text-center" style="padding: 0 !important;">
+                            <div class="div-no-btn" @onclick="@(() => ContractManager.Open(ManagerOpenMode.UpdateMix, contract))">
+                                <span class="m-auto fs-0p9rem">@(i + 1)</span>
+                            </div>
+                        </td>
+                        <td class="position-relative bg-lightblue d-flex" style="padding: 0 !important; text-align: left !important;">
+
+                            <span class="spantextbox apu-item-description bg-lightblue" role="textbox" contenteditable @onkeypress:preventDefault>
+                                @contract.Description
+                            </span>
+
+                            @if (CanEdit)
+                            {
+                                <SfButton CssClass="b-none br-0 w-39px bg-lightblue" IconCss="e-icons e-icon-close"
+                                @onclick="@(() => ApuContractRemove(contract))"
+                                @onpointerdown="@ContractSelectorClose" />
+                            }
+                        </td>
+                        <td class="pointer-events-all" style="text-align: center; padding: 0 !important;">
+                            @if (string.IsNullOrWhiteSpace(contract.Link))
+                            {
+                                <SfButton CssClass="b-none br-0 w-39px" IconCss="e-icons e-icon-link" Disabled="true" />
+                            }
+                            else
+                            {
+                                <SfTooltip Content="@contract.Link">
+                                    <SfButton CssClass="b-none br-0 w-39px" IconCss="e-icons e-icon-link"
+                                    @onclick="@(() => JS.OpenUrlInNewTab(contract.Link))" />
+                                </SfTooltip>
+                            }
+                        </td>
+                        <td class="bg-lightblue" style="padding: 0 !important;">
+                            <div class="d-flex">
+                                <SfDropDownList Readonly="@(!CanEdit)" CssClass="@("bg-lightblue b-none br-0")" TValue="int" TItem="ItemType" DataSource="@ItemTypes" AllowFiltering="false"
+                                                Value="@contract.ItemTypeId">
+                                    <DropDownListFieldSettings Value="@nameof(ItemType.Id)" Text="@nameof(ItemType.Name)" />
+                                    <DropDownListEvents TValue="int" TItem="ItemType" OnValueSelect="@((arg) => SfDropDownApuContractItemType_OnValueSelect(arg, contract))" />
+                                </SfDropDownList>
+                            </div>
+                        </td>
+                        <td style="text-align: center;">@contract.Unit</td>
+                        <td class="bg-lightblue" style="padding: 0 !important;">
+                            <div class="d-flex">
+                                <SfNumericTextBox Readonly="@(!CanEdit)" TValue="decimal" CssClass="sf-ntb-align-right fs-0p8rem bg-lightblue b-none br-0"
+                                                  Value="@contract.Quantity" ValueChanged="@((arg) => ApuContractQuantityChanged(arg, contract))"
+                                @onfocusout="@(() => ApuContractUpdateQuantity(contract))"
+                                                  Min="0" Format="n" ShowSpinButton="false" />
+                            </div>
+                        </td>
+                        <td>@contract.Price.ToDollar()</td>
+                        <td>@contract.Total.ToDollar()</td>
+                        <td>@contract.TotalExtend.ToDollar()</td>
+                    </tr>
+                }
+
+                @* E1 *@
+                <tr>
+                    <td colspan="4" style="text-align: left;">Contracts Notes:</td>
+                    <td colspan="3" class="bg-darkblue">Sub-Total Contracts:</td>
+                    <td class="bg-darkblue">@Apu?.ContractSum.SubTotal.ToDollar()</td>
+                    <td class="bg-darkblue">@Apu?.ContractSum.SubTotalExtend.ToDollar()</td>
+                </tr>
+                @* E2 *@
+                <tr>
+                    <td colspan="4" rowspan="2" style="padding: 0 !important; vertical-align: top !important;">
+                        @if (CanEdit)
+                        {
+                            <SfTextBox CssClass="b-none br-0" Multiline="true" @bind-Value="@Apu.ContractNotes"
+                                       HtmlAttributes="@(new Dictionary<string, object> { { "rows", 2 } })"
+                                       @onfocusout="@ApuUpdateContractNotes"/>
+                        }
+                        else
+                        {
+                            <span class="spantextarea apu-item-note" role="textbox" contenteditable @onkeypress:preventDefault>
+                                @Apu.ContractNotes
+                            </span>
+                        }
+                    </td>
+                    <td colspan="2">Gross Margin Contracts:</td>
+                    <td class="bg-lightblue" style="padding: 0 !important;">
+                        <div class="d-flex">
+                            <SfNumericTextBox Readonly="@(!CanEdit)" TValue="decimal" CssClass="sf-ntb-align-right fs-0p8rem bg-lightblue b-none br-0"
+                                              Value="@Apu.SubcontractorGrossPercentage" ValueChanged="@ApuContractGrossPctChanged"
+                                              @onfocusout="@ApuUpdateContractGrossPct"
+                                              Min="0" Format="n" ShowSpinButton="false"/>
+                            <span class="my-auto me-1">%</span>
+                        </div>
+                    </td>
+                    <td class="">@Apu?.ContractSum.GrossTotal.ToDollar()</td>
+                    <td class="">@Apu?.ContractSum.GrossTotalExtend.ToDollar()</td>
+                </tr>
+                @* E3 *@
+                <tr>
+                    <td colspan="3" class="bg-yellow">Total Contracts:</td>
+                    <td class="bg-yellow">@Apu?.ContractSum.Total.ToDollar()</td>
+                    <td class="bg-yellow">@Apu?.ContractSum.TotalExtend.ToDollar()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (Apu is not null)
+    {
+        @* Sub-Total Unitari Cost: *@
+        <table class="table table-bordered tab mb-2 @(Apu is null || CanEdit == false ? "tab-block" : "")">
+            <thead>
+            <tr class="bg-darkblue">
+                <th style="width: 1000px;" class="text-end">Sub-Total Unitari Cost:</th>
+                <th style="width: 100px;" class="text-end">@Apu?.Sum.SubTotal.ToDollar()</th>
+                <th style="width: 100px;" class="text-end">@Apu?.Sum.SubTotalExtend.ToDollar()</th>
+            </tr>
+            </thead>
+        </table>
+
+        @* Total General gross: *@
+        <table class="table table-bordered tab mb-2 @(Apu is null || CanEdit == false ? "tab-block" : "")">
+            <thead>
+            <tr>
+                <th style="width: 900px;" class="text-end">Total General gross:</th>
+                <th style="width: 100px;" class="text-end">@Apu?.Sum.GrossTotalPct.ToPercentage()</th>
+                <th style="width: 100px;" class="text-end">@Apu?.Sum.GrossTotal.ToDollar()</th>
+                <th style="width: 100px;" class="text-end">@Apu?.Sum.GrossTotalExtend.ToDollar()</th>
+            </tr>
+            </thead>
+        </table>
+                
+        @* Total General: *@
+        <table class="table table-bordered tab mb-2 @(Apu is null || CanEdit == false ? "tab-block" : "")">
+            <thead>
+            <tr class="bg-yellow">
+                <th style="width: 1000px;" class="text-end">Total General:</th>
+                <th style="width: 100px;" class="text-end">@Apu?.Sum.Total.ToDollar()</th>
+                <th style="width: 100px;" class="text-end">@Apu?.Sum.TotalExtend.ToDollar()</th>
+            </tr>
+            </thead>
+        </table>
+    }
+
+</div>

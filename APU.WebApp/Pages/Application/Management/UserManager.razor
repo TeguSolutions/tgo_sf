@@ -1,0 +1,117 @@
+﻿@layout AppLayout
+@inherits UserManagerVM
+@page "/users"
+
+<PageTitle>Users | TechGroupOne</PageTitle>
+
+<div id="usermanager-container" class="usermanager-container">
+
+    <DlgConfirmation @ref="@DlgConfirmation" T="User" HeaderText="Delete Confirmation" Width="200px" />
+    <DlgUserRegistration @ref="@DlgUserRegistration" Target="usermanager-container" />
+
+    <div class="usermanager-content">
+        
+        <div class="d-flex mb-2">
+            <SfButton CssClass="ms-auto me-2" Content="New User" OnClick="@(() => DlgUserRegistration?.Open())" />
+        </div>
+
+        <div class="usermanager-grid-container">
+            <SfGrid Height="100%" Width="100%" DataSource="@Users" RowHeight="38">
+
+                <GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true" Mode="@SfGridEditMode.Normal" />
+                <GridEvents TValue="User" CommandClicked="@DataGridCommandClick" OnActionBegin="@DataGridActionBegin" />
+
+                <GridColumns>
+                    <GridColumn Field="@nameof(User.Id)" IsPrimaryKey="true" Width="0" Visible="false" />
+
+                    <GridColumn HeaderText="Manage" TextAlign="SfGridTextAlign.Center" Width="120">
+                        <GridCommandColumns>
+                            <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-edit", CssClass = "e-flat" })" />
+                            <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-delete", CssClass = "e-flat" })" />
+                            <GridCommandColumn Type="CommandButtonType.Save" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-save", CssClass = "e-flat" })" />
+                            <GridCommandColumn Type="CommandButtonType.Cancel" ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-cancel-icon", CssClass = "e-flat" })" />
+                        </GridCommandColumns>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(User.Name)" HeaderText="Name" TextAlign="SfGridTextAlign.Center" Width="200" />
+                    <GridColumn Field="@nameof(User.Email)" HeaderText="Email" TextAlign="SfGridTextAlign.Center" Width="250" />
+                    
+                    <GridColumn Field="@nameof(User.UserRoles)" HeaderText="Roles" TextAlign="SfGridTextAlign.Center" Width="460">
+                        <Template>
+                            @{
+                                var user = (User)context;
+                    
+                                <div class="d-flex">
+                                    @foreach (var userRole in user.UserRoles)
+                                    {
+                                        <SfDropDownButton Content="@userRole.Role.Name" CssClass="e-caret-hide me-1">
+                                            <DropDownMenuItems>
+                                                <DropDownMenuItem Text="Remove" @onpointerdown="() => UserRemoveRole(user, userRole)"/>
+                                            </DropDownMenuItems>
+                                        </SfDropDownButton>
+                                    }
+                                    
+                                    <SfDropDownButton IconCss="e-icons e-icon-plus" CssClass="ms-auto e-caret-hide">
+                                        <DropDownMenuItems>
+                                            @{
+                                                var availableRoles = GetAvailableRoles(user.UserRoles);
+                                                foreach (var role in availableRoles)
+                                                {
+                                                    <DropDownMenuItem Text="@role.Name" @onpointerdown="() => UserAddRole(user, role)"/> 
+                                                }
+                                            }
+
+
+                                        </DropDownMenuItems>
+                                    </SfDropDownButton>
+                                </div>
+                            }
+                        </Template>
+                        <EditTemplate>
+                            @{
+                                var user = (User)context;
+                    
+                             
+                            }
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(User.IsBlocked)" HeaderText="Blocked" TextAlign="SfGridTextAlign.Center" Width="80" Type="ColumnType.Boolean">
+                        <Template>
+                            @{
+                                var user = (User)context;
+                                <SfCheckBox TChecked="bool" Checked="@user.IsBlocked" Disabled="true"/>
+                            }
+                        </Template>
+                    </GridColumn>
+                    
+                    <GridColumn Field="@nameof(User.Initials)" HeaderText="Initials" TextAlign="SfGridTextAlign.Center" />
+                    
+                    <GridColumn Field="@nameof(User.HasSession)" HeaderText="Session" Width="80" TextAlign="SfGridTextAlign.Center" AllowEditing="false">
+                        <Template>
+                            @{
+                                var user = (User)context;
+
+                                if (user.HasSession)
+                                {
+                                    <span>Ok</span>
+                                }
+                                else
+                                {
+                                    <SfButton Content="Create" @onclick="@(() => CreateUserSession(user))"/>
+                                }
+                            }
+                        </Template>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(User.LastUpdatedAt)" HeaderText="Date" TextAlign="@SfGridTextAlign.Center" Width="130" Type="@ColumnType.Date" Format="d" AllowEditing="false" />
+                    @*<GridColumn Field="@(nameof(User.LastUpdatedBy) + "." + nameof(User.Monogram))" HeaderText="User" TextAlign="@SfGridTextAlign.Center" Width="100" AllowEditing="false"/>*@
+
+                </GridColumns>
+            </SfGrid>
+        </div>
+
+    </div>
+
+</div>
+

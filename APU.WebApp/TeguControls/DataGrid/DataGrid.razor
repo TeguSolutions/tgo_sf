@@ -1,0 +1,72 @@
+﻿@namespace Tegu.Blazor.Controls
+@typeparam T
+@inherits DataGridVM<T>
+
+<CascadingValue Value="this">
+
+    <div id="@Id"
+         class="grid @Css"
+         style="@Style width: @Width; height: fit-content; max-height: @MaxHeight;">
+
+        <DataGridHeader T="T"/>
+        
+        <div id="@IdItems"
+             class="grid-items"
+             style="height: fit-content; max-height: @ItemContainerHeight;">
+
+            @if (Items?.Count() > 0)
+            {
+                if (!AllowGrouping)
+                {
+                    @foreach (var item in Items)
+                    {
+                        <DataGridRow T="T" Item="item" @ref="@Rows[item]"/>
+                    }
+                }
+                else
+                {
+                    if (GroupedItems is not null)
+                    {
+                        foreach (var groupedItem in GroupedItems)
+                        {
+                            <div class="d-flex">
+                                @foreach (var g in groupedItem.Key.Groups)
+                                {
+                                    <div style="min-height: 32px; padding-inline: 6px; display: flex;">
+                                        @g.Content(g.Item)
+                                    </div>
+                                }
+                            </div>
+
+                            foreach (var g in groupedItem.Value)
+                            {
+                                <DataGridRow T="T" Item="g" @ref="@Rows[g]"/>
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                <span>There is no items..</span>
+            }
+        </div>
+
+    </div>
+    
+    <div class="grid-column-definitions">
+        @Columns
+        
+        @Groups
+
+        @if (ExpandTemplate is not null)
+        {
+@*             <DataGridColumn T="T" Header="" Width="50px" @ref="@ColExpand">
+                <Template>
+                    <IconButton Css="m-auto icon-rotate3d-180deg" Icon="@Svg.ArrowDown" Click="@(() => ToggleExpandTemplate(context))"/>
+                </Template>
+            </DataGridColumn> *@
+        }
+    </div>
+
+</CascadingValue>

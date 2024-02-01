@@ -1,0 +1,24 @@
+﻿@namespace Tegu.Blazor.Controls
+@typeparam T
+@inherits DataGridHeaderVM<T>
+
+<CascadingValue Value="this">
+    
+    <div id="@Id" class="grid-header"
+         style="height: @DataGrid.HeaderHeight; @ScrollPadding">
+
+        @foreach (var column in DataGrid.DataColumns)
+        {
+            if (DataGrid.AllowGrouping)
+            {
+                if (DataGrid.GroupVMs.FirstOrDefault(g => g.Field == column.Field) != null)
+                    continue;
+            }
+
+            <DataGridHeaderCell T="T" Column="@column"/>
+        }
+
+    </div>    
+
+</CascadingValue>
+

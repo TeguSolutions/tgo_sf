@@ -1,0 +1,218 @@
+﻿@inherits DlgLaborManagerVM
+
+<SfDialog @bind-Visible="@IsVisible" IsModal="true" Width="80%" Target="@Target" CloseOnEscape="false">
+
+    <DialogTemplates>
+        <Header>
+            <span>@Mode.Name Labor</span>
+        </Header>
+        <Content>
+            
+            <EditForm @ref="@Form" Model="@Labor">
+                <DataAnnotationsValidator/>
+                @*<ValidationSummary/>*@
+                
+                <div class="d-flex mb-2">
+                    <span class="me-2 mt-4px wmm-95px text-end">Description:</span>
+                    <div class="w-100">
+                        <SfTextBox @bind-Value="@Labor.Description" Placeholder="Description"/>
+                        <div style="font-size: 13px; color: red;">
+                            <ValidationMessage For="@(() => Labor.Description)"/>
+                        </div>
+                    </div>
+                </div>                    
+
+                <div class="row m-1">
+                    
+                    <div class="col-lg-3 px-1 d-flex flex-column">
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">Salary:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox CssClass="" @bind-Value="@(Labor.Salary)" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.Salary)"/>
+                                </div>
+                            </div>
+                        </div>  
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">TOT Hours:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox @bind-Value="@(Labor.HrsYear)" Min="0" Format="0" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.HrsYear)"/>
+                                </div>
+                            </div>
+                        </div>  
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">STD Hours:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox @bind-Value="@(Labor.HrsStandardYear)" Min="0" Format="0" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.HrsStandardYear)"/>
+                                </div>
+                            </div>
+                        </div>  
+                        
+                        <div class="d-flex">
+                            <span class="me-2 mt-4px wmm-95px text-end">OT Hours:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox @bind-Value="@(Labor.HrsOvertimeYear)" Min="0" Format="0" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.HrsOvertimeYear)"/>
+                                </div>
+                            </div>
+                        </div>  
+
+                    </div>
+                    
+                    <div class="col-lg-3 px-1 d-flex flex-column">
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">Vacation:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox @bind-Value="@(Labor.VacationsDays)" Min="0" Format="0" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.VacationsDays)"/>
+                                </div>
+                            </div>
+                        </div> 
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">Holiday:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox @bind-Value="@(Labor.HolydaysYear)" Min="0" Format="0" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.HolydaysYear)"/>
+                                </div>
+                            </div>
+                        </div> 
+                        
+                        <div class="d-flex">
+                            <span class="me-2 mt-4px wmm-95px text-end">Sick Days:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox @bind-Value="@(Labor.SickDaysYear)" Min="0" Format="0" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.SickDaysYear)"/>
+                                </div>
+                            </div>
+                        </div> 
+
+                    </div>
+                    
+                    <div class="col-lg-3 px-1 d-flex flex-column">
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">Bonus:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox CssClass="" @bind-Value="@(Labor.BonusYear)" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.BonusYear)"/>
+                                </div>
+                            </div>
+                        </div> 
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">Health:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox CssClass="" @bind-Value="@(Labor.HealthYear)" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.HealthYear)"/>
+                                </div>
+                            </div>
+                        </div> 
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">Life Ins:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox CssClass="" @bind-Value="@(Labor.LifeInsYear)" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.LifeInsYear)"/>
+                                </div>
+                            </div>
+                        </div> 
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">Uniform:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox CssClass="" @bind-Value="@(Labor.UniformsYear)" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.UniformsYear)"/>
+                                </div>
+                            </div>
+                        </div> 
+                        
+                        <div class="d-flex">
+                            <span class="me-2 mt-4px wmm-95px text-end">Safety:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox CssClass="" @bind-Value="@(Labor.SafetyYear)" Format="c" Currency="USD" Decimals="2" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.SafetyYear)"/>
+                                </div>
+                            </div>
+                        </div> 
+
+                    </div>
+                    
+                    <div class="col-lg-3 px-1 d-flex flex-column">
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">401 %:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox @bind-Value="@(Labor.Percentage401)" Min="0" Format="0" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.Percentage401)"/>
+                                </div>
+                            </div>
+                        </div> 
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">Meeting:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox @bind-Value="@(Labor.MeetingsHrsYear)" Min="0" Format="0" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.MeetingsHrsYear)"/>
+                                </div>
+                            </div>
+                        </div> 
+                        
+                        <div class="d-flex mb-1">
+                            <span class="me-2 mt-4px wmm-95px text-end">Office:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox @bind-Value="@(Labor.OfficeHrsYear)" Min="0" Format="0" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.OfficeHrsYear)"/>
+                                </div>
+                            </div>
+                        </div> 
+                        
+                        <div class="d-flex">
+                            <span class="me-2 mt-4px wmm-95px text-end">Training:</span>
+                            <div class="w-100">
+                                <SfNumericTextBox @bind-Value="@(Labor.TrainingHrsYear)" Min="0" Format="0" ShowSpinButton="false"/>
+                                <div style="font-size: 13px; color: red;">
+                                    <ValidationMessage For="@(() => Labor.TrainingHrsYear)"/>
+                                </div>
+                            </div>
+                        </div> 
+
+                    </div>
+
+                </div>
+
+            </EditForm>
+            
+            <div class="d-flex justify-content-end mt-2">
+                <SfButton Content="Cancel" OnClick="@DialogCancel"/>
+                @foreach(var (button, mode) in Mode.Buttons)
+                {
+                    <SfButton CssClass="ms-2" Content="@button" @onclick="@(() => DialogSubmit(mode))"/>
+                }
+            </div>
+
+        </Content>
+    </DialogTemplates>
+
+</SfDialog>

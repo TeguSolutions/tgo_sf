@@ -1,0 +1,214 @@
+﻿@layout AppLayout
+@inherits SchedulePageVM
+@page "/estimates/schedule"
+
+<PageTitle>Estimates - Schedule | TechGroupOne</PageTitle>
+
+<div id="scheduling-container" class="scheduling-container">
+
+    <DlgConfirmation @ref="@ConfirmationDialogDeleteProjectSchedule" T="@ProjectModel" Target="scheduling-container" HeaderText="Delete Confirmation" Width="350px" />
+
+    <div class="scheduling-content">
+        
+        <div class="d-flex mb-2" style="height: 30px;">
+            
+            <SfCheckBox TChecked="bool?" CssClass="my-auto e-customsize me-1" Checked="@IsBlocked" Indeterminate="@(IsBlocked == null)" Label="Blocked:" 
+                        LabelPosition="@ButtonLabelPosition.Before" @onclick="@IsBlockedChanged" />
+
+            <SfComboBox @ref="@SfCbProjectFilter" TValue="ProjectModel" TItem="ProjectModel" Value="@SelectedProjectModel" DataSource="@FilteredProjectModels"
+                        CssClass="me-2" Width="350px" Placeholder="Select a Project" 
+                        AllowFiltering="true">
+                <ComboBoxFieldSettings Value="@nameof(ProjectModel.Id)" Text="@nameof(ProjectModel.ProjectName)" />
+                <ComboBoxEvents TValue="ProjectModel" TItem="ProjectModel" Filtering="ProjectFilterChanged" ValueChange="@SelectedProjectCBChanged" />
+            </SfComboBox>
+
+            @if (SelectedProject?.HasSchedule == true)
+            {
+                <div class="d-flex mx-auto">
+                    <small class="me-1 my-auto">Start Date:</small>
+                    <SfDatePicker TValue="DateTime?" CssClass="me-2" Width="125px" Value="@SelectedProject.StartDate" Readonly="@(!CanEdit)">
+                        <DatePickerEvents TValue="DateTime?" ValueChange="@ProjectStartDateChanged"/>
+                    </SfDatePicker>
+
+                    <small class="me-1 my-auto">End Date:</small>
+                    <SfDatePicker TValue="DateTime?" CssClass="me-2" Width="125px" Value="@SelectedProject.EndDate" Readonly="@(!CanEdit)">
+                        <DatePickerEvents TValue="DateTime?" ValueChange="@ProjectEndDateChanged" />
+                    </SfDatePicker>
+
+                    <SfCheckBox TChecked="bool?" CssClass="my-auto e-customsize me-1" Checked="@SM.IsHidden" Indeterminate="@(SM.IsHidden == null)" Label="Hidden Items: "
+                                LabelPosition="@ButtonLabelPosition.Before" @onclick="@SM.IsHiddenChanged" />
+                </div>
+
+                <span class="ms-auto"></span>
+
+                @if (CanEdit)
+                {
+                    <SfTooltip CssClass="" Content="By default the Schedule items are synchronized with the APU Line Items, use it only when mismatch occurs." Position="@Position.BottomCenter">
+                        <SfButton Disabled="false" CssClass="me-1" Content="Synchronize" @onclick="@ProjectScheduleSynchronizeItems" />
+                    </SfTooltip>
+
+                    <SfTooltip CssClass="" Content="Deletes the complete Project Schedule!" Position="@Position.BottomCenter">
+                        <SfButton CssClass="e-outline e-danger" Content="Delete" @onclick="@ConfirmationDialogDeleteProjectScheduleOpen" />
+                    </SfTooltip>
+                }
+            }
+
+        </div>
+        
+        <div class="scheduling-grid-container">
+
+            @if (SelectedProjectModel is null)
+            {
+                <div class="d-flex flex-column">
+                    <span class="mx-auto mt-3 fw-600">Select a Project for Scheduling!</span>
+                </div>
+            }
+            else if (!SelectedProjectModel.HasSchedule)
+            {
+                <div class="d-flex flex-column">
+                    <span class="mx-auto mt-3">There is no Schedule for:</span>
+                    <span class="mx-auto fw-600">@SelectedProjectModel?.ProjectName</span>
+                    @if (CanEdit)
+                    {
+                        <SfButton CssClass="mx-auto mt-1" Content="Create Schedule" @onclick="@ProjectScheduleCreate" />
+                    }
+                </div>
+            }
+            else if (!string.IsNullOrWhiteSpace(InitializationError))
+            {
+                <div class="d-flex flex-column">
+                    <span class="mx-auto mt-3 clr-red">@InitializationError</span>
+                </div>
+            }
+            else
+            {
+                <div class="@(CanEdit == false ? "tab-block" : "")" style="height: 100%;">
+                    <ErrorBoundary >
+                        <ChildContent>
+
+                            @*
+                                Use Predecessor instead of Dependency property!
+                                Query="@SM.GanttQuery"
+                            *@
+                            <SfGantt ID="GanttSchedule" @ref="@SM.Gantt" TValue="ProjectSchedule"
+                                     DataSource="@SM.ScheduleItems"
+                                     Holidays="@SM.GanttHolidays" IncludeWeekend="false" HighlightWeekends="true"
+                                     Toolbar="@SM.GanttToolbarItems"
+                                     ProjectStartDate="@GanttStartDate"
+                                     ProjectEndDate="@GanttEndDate"
+                                     CustomZoomingLevels="@SM.GanttZoomingLevels"
+                                     Height="100%" Width="100%" RowHeight="34" TaskbarHeight="34"
+                                     TreeColumnIndex="3"
+                                     TaskMode="ScheduleMode.Auto" WorkUnit="WorkUnit.Day" DurationUnit="DurationUnit.Day"
+                                     AutoCalculateDateScheduling="true"
+                                     AllowExcelExport="true" AllowFiltering="true"
+                                     AllowReordering="true" AllowResizing="true" AllowRowDragAndDrop="true"
+                                     AllowSelection="true" AllowSorting="false" AllowUnscheduledTasks="true"
+                                     ShowColumnChooser="true" ShowColumnMenu="true" ShowInlineNotes="true"
+                                     ScrollToTaskbarOnClick="true">
+
+                                @*
+                                    Unused:
+                                    Progress="@nameof(ProjectSchedule.Progress)"
+                                *@
+                                <GanttTaskFields Id="@nameof(ProjectSchedule.Id)"
+                                                 ParentID="@nameof(ProjectSchedule.ParentId)"
+                                                 Dependency="@nameof(ProjectSchedule.Predecessor)"
+                                                 Name="@nameof(ProjectSchedule.GanttDescription)"
+                                                 StartDate="@nameof(ProjectSchedule.StartDate)"
+                                                 EndDate="@nameof(ProjectSchedule.EndDate)"
+                                                 Duration="@nameof(ProjectSchedule.Duration)">
+                                </GanttTaskFields>
+
+                                @*
+                                    Remove this:
+                                    OnActionFailure="@GanttActionFailure"
+                                    OnActionBegin="@GanttOnActionBegin"
+                                *@
+                                <GanttEvents TValue="ProjectSchedule"
+                                             OnToolbarClick="@SM.GanttToolbarClick"
+                                             OnActionComplete="@SM.GanttOnActionComplete"
+                                             RowDropped="@SM.GanttRowDropped"
+                                             Searched="@SM.GanttSearched"
+                                             RowCreating="@SM.GanttRowCreating"
+                                             RowUpdating="@SM.GanttRowUpdating"
+                                             RowUpdated="@SM.GanttRowUpdated"/>
+
+                                @*
+                                    Don't use!
+                                    NewRowPosition="RowPosition.Below"
+                                *@
+                                <GanttEditSettings AllowAdding="true" AllowDeleting="true"
+                                                   AllowEditing="true" AllowTaskbarEditing="true"
+                                                   AllowSchedulingOnDrag="true"
+                                                   ShowDeleteConfirmDialog="true"
+                                                   Mode="SfGanttEditMode.Dialog"/>
+
+                                <GanttFilterSettings HierarchyMode="FilterHierarchyMode.Both"/>
+
+                                <GanttSearchSettings Fields="@(new[] { "GanttDescription" })" Operator="Operator.Contains"
+                                                     Key="" IgnoreCase="true" IgnoreAccent="true"/>
+
+                                <GanttSplitterSettings Collapsible="true" Position="615px"/>
+
+
+                                <GanttTimelineSettings TimelineUnitSize="33" TimelineViewMode="TimelineViewMode.None" WeekStartDay="0" UpdateTimescaleView="true">
+                                    <GanttTopTierSettings Unit="TimelineViewMode.Month" Format="yyyy MMM" />
+                                    <GanttBottomTierSettings Unit="TimelineViewMode.Day" Format="dd" />
+                                </GanttTimelineSettings> 
+
+                                @* <GanttLabelSettings TValue="ProjectSchedule" /> *@
+
+                                <GanttColumns>
+                                    <GanttColumn Field="@nameof(ProjectSchedule.Id)" Visible="false" Width="320px" IsPrimaryKey="true"/>
+
+                                    @*
+                                        AllowFiltering="true"
+                                        FilterSettings="new FilterSettings { Operator = Operator.Equal, Type = FilterType.CheckBox  }"
+                                    *@
+                                    <GanttColumn Field="@nameof(ProjectSchedule.IsHidden)" HeaderText="Is Hidden" Width="40px" AllowEditing="false">
+                                        <HeaderTemplate>
+                                            <span></span>
+                                        </HeaderTemplate>
+                                        <Template>
+                                            @{
+                                                var ps = (ProjectSchedule)context;
+                                                <input class="csr-ptr" style="width: 18px; height: 18px; margin-top: 5px;" type="checkbox" checked="@ps.IsHidden" @oninput="@(() => ScheduleItemUpdateIsHidden(ps))"/>
+                                            }
+                                        </Template>
+                                    </GanttColumn>
+
+                                    <GanttColumn Field="@nameof(ProjectSchedule.OrderNo)" HeaderText="No" Width="45px" AllowEditing="false">
+                                        <Template>
+                                            <span>@(((ProjectSchedule)context).OrderNo)</span>
+                                        </Template>
+                                    </GanttColumn>
+
+                                    <GanttColumn Field="@nameof(ProjectSchedule.GanttDescription)" HeaderText="Description" Width="500px" ClipMode="ClipMode.EllipsisWithTooltip"/>
+                                    <GanttColumn Field="@nameof(ProjectSchedule.StartDate)" HeaderText="Start Date" Width="110px"/>
+                                    <GanttColumn Field="@nameof(ProjectSchedule.EndDate)" HeaderText="End Date" Width="100px"/>
+                                    <GanttColumn Field="@nameof(ProjectSchedule.Duration)" HeaderText="Duration" Width="110px"/>
+                                    @*<GanttColumn Field="@nameof(ProjectSchedule.Progress)" HeaderText="Progress" Width="110px" />*@
+                                    <GanttColumn Field="@nameof(ProjectSchedule.Predecessor)" HeaderText="Dependency" Width="200px"/>
+
+                                    <GanttColumn Field="@nameof(ProjectSchedule.GanttCustomDescription)" HeaderText="Custom Description" Visible="true" Width="0px"/>
+                                </GanttColumns>
+                            </SfGantt>
+
+                        </ChildContent>
+                        <ErrorContent>
+                            <div class="alert alert-danger" role="alert">
+                                <p>Gantt control crashed, please refresh the page.</p>
+                                <p>Error Message: @context.Message</p>
+                                @if (!string.IsNullOrWhiteSpace(context.InnerException?.Message))
+                                {
+                                    <p>@context.InnerException.Message</p>
+                                }
+                            </div>
+                        </ErrorContent>
+                    </ErrorBoundary>
+                </div>
+            }
+        </div>
+    </div>
+</div>
