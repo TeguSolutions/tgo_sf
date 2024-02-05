@@ -701,7 +701,7 @@ public class SchedulePageVM : PageVMBase, IDisposable
             return Result.Fail();
         }
 
-        SM.SortItems();
+        //SM.SortItems();
 
         await ScheduleItemUpdateOrderNosAndParentIdsAsync();
         return Result.Ok();
