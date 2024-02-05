@@ -678,18 +678,18 @@ public class SchedulePageVM : PageVMBase, IDisposable
 
     #region Project Schedule Items - CRUD
 
-    private async void ScheduleItemAddAsync(ProjectSchedule ps)
+    private async Task<Result> ScheduleItemAddAsync(ProjectSchedule ps)
     {
         if (ps is null)
         {
             ShowError("Project Schedule is null!");
-            return;
+            return Result.Fail();
         }
 
         if (SelectedProject is null)
         {
             ShowError("Select a Project!?");
-            return;
+            return Result.Fail();
         }
 
         ps.ProjectId = SelectedProject.Id;
@@ -698,12 +698,13 @@ public class SchedulePageVM : PageVMBase, IDisposable
         if (!addResult.IsSuccess())
         {
             ShowError(addResult);
-            return;
+            return Result.Fail();
         }
 
         SM.SortItems();
 
         await ScheduleItemUpdateOrderNosAndParentIdsAsync();
+        return Result.Ok();
     }
 
     internal async void ScheduleItemUpdateIsHidden(ProjectSchedule schedule)
@@ -816,12 +817,12 @@ public class SchedulePageVM : PageVMBase, IDisposable
             return;
         }
 
-        // Triggers - GanttOnActionComplete
-        //await SM.Gantt.DeleteRecordAsync(selectedItem.Id);
+        // Triggers - GanttRowDeleting event
+        //await SM.Gantt.DeleteRecordAsync(selectedItem.Id); - not working
         await SM.Gantt.DeleteRecordAsync();
     }
 
-    private async void ScheduleItemDeletePostDb(ProjectSchedule ps)
+    private async Task<Result> ScheduleItemDeletePostDb(ProjectSchedule ps)
     {
         ProgressStart();
 
@@ -829,11 +830,12 @@ public class SchedulePageVM : PageVMBase, IDisposable
         if (!result.IsSuccess())
         {
             ShowError(result.Message);
-            return;
+            return Result.Fail();
         }
 
         await ScheduleItemUpdateOrderNosAndParentIdsAsync();
 
+        return Result.Ok();
     }
 
     #endregion

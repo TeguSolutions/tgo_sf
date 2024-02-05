@@ -49,7 +49,7 @@ public class ProjectSchedule
     public string Duration { get; set; }
 
     //public string DurationUnit { get; set; } = "day";
-    //public int? Progress { get; set; }
+    public int Progress { get; set; }
 
 
     // Relations

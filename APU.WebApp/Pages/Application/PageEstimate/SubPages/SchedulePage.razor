@@ -117,7 +117,8 @@
                                                  Name="@nameof(ProjectSchedule.GanttDescription)"
                                                  StartDate="@nameof(ProjectSchedule.StartDate)"
                                                  EndDate="@nameof(ProjectSchedule.EndDate)"
-                                                 Duration="@nameof(ProjectSchedule.Duration)">
+                                                 Duration="@nameof(ProjectSchedule.Duration)"
+                                                 Progress="@nameof(ProjectSchedule.Progress)">
                                 </GanttTaskFields>
 
                                 @*
@@ -127,12 +128,15 @@
                                 *@
                                 <GanttEvents TValue="ProjectSchedule"
                                              OnToolbarClick="@SM.GanttToolbarClick"
+                                             OnActionBegin="@SM.GanttOnActionBegin"
                                              OnActionComplete="@SM.GanttOnActionComplete"
-                                             RowDropped="@SM.GanttRowDropped"
                                              Searched="@SM.GanttSearched"
+
+                                             RowDropped="@SM.GanttRowDropped"
                                              RowCreating="@SM.GanttRowCreating"
                                              RowUpdating="@SM.GanttRowUpdating"
-                                             RowUpdated="@SM.GanttRowUpdated"/>
+                                             RowUpdated="@SM.GanttRowUpdated"
+                                             RowDeleting="@SM.GanttRowDeleting"/>
 
                                 @*
                                     Don't use!
@@ -188,7 +192,7 @@
                                     <GanttColumn Field="@nameof(ProjectSchedule.StartDate)" HeaderText="Start Date" Width="110px"/>
                                     <GanttColumn Field="@nameof(ProjectSchedule.EndDate)" HeaderText="End Date" Width="100px"/>
                                     <GanttColumn Field="@nameof(ProjectSchedule.Duration)" HeaderText="Duration" Width="110px"/>
-                                    @*<GanttColumn Field="@nameof(ProjectSchedule.Progress)" HeaderText="Progress" Width="110px" />*@
+                                    <GanttColumn Field="@nameof(ProjectSchedule.Progress)" HeaderText="Progress" Width="110px" />
                                     <GanttColumn Field="@nameof(ProjectSchedule.Predecessor)" HeaderText="Dependency" Width="200px"/>
 
                                     <GanttColumn Field="@nameof(ProjectSchedule.GanttCustomDescription)" HeaderText="Custom Description" Visible="true" Width="0px"/>

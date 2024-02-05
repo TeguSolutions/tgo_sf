@@ -34,11 +34,11 @@ public class ScheduleManager
 
     internal Action StateChanged { get; set; }
 
-    internal Action<ProjectSchedule> ItemAdd { get; set; }
+    internal Func<ProjectSchedule, Task<Result>> ItemAdd { get; set; }
     internal Action<ProjectSchedule> ItemUpdate { get; set; }
     internal Action ItemUpdateOrderNos { get; set; }
     internal Action ItemDeletePre { get; set; }
-    internal Action<ProjectSchedule> ItemDeletePost { get; set; }
+    internal Func<ProjectSchedule, Task<Result>> ItemDeletePost { get; set; }
 
     #endregion
 
@@ -315,6 +315,18 @@ public class ScheduleManager
 
     #region Gantt - Events
 
+    public void GanttOnActionBegin(GanttActionEventArgs<ProjectSchedule> args)
+    {
+        if (args.RequestType == SfGanttAction.Refresh)
+            return;
+
+        // Any update/save action
+        if (args.RequestType == SfGanttAction.Save)
+        {
+
+        }
+    }
+
     public void GanttOnActionComplete(GanttActionEventArgs<ProjectSchedule> args)
     {
         if (args.RequestType == SfGanttAction.Refresh)
@@ -323,20 +335,12 @@ public class ScheduleManager
         // Any update/save action
         if (args.RequestType == SfGanttAction.Save)
         {
-            if (args.Action == "Add")
-            {
-                ItemAdd.Invoke(args.Data);
-            }
-            else if (args.Action is "DialogEditing" or "TaskbarEditing" or "DrawConnectorLine")
+            if (args.Action is "DialogEditing" or "TaskbarEditing" or "DrawConnectorLine")
             {
                 ItemUpdate.Invoke(args.Data);
             }
             else
             { }
-        }
-        else if (args.RequestType == SfGanttAction.Delete)
-        {
-            ItemDeletePost.Invoke(args.Data);
         }
         // Indent/Outdent
         else if (args.RequestType == SfGanttAction.RowDragAndDrop)
@@ -356,15 +360,13 @@ public class ScheduleManager
     }
 
 
-    internal async void GanttRowCreating(GanttRowCreatingEventArgs<ProjectSchedule> args)
+    internal async Task GanttRowCreating(GanttRowCreatingEventArgs<ProjectSchedule> args)
     {
         if (args.Data is null)
         {
             args.Cancel = true;
             return;
         }
-
-        // Fill and pass to the ActionComplete
 
         var selectedSchedule = await GetSelectedItemAsync();
         Guid? parentId = null;
@@ -381,7 +383,12 @@ public class ScheduleManager
         args.Data.OrderNo = orderNo;
         //args.Data.ProjectId = SelectedProjectModel.Id;
         args.Data.Description = args.Data.GanttCustomDescription;
+
+        var result = await ItemAdd.Invoke(args.Data);
+        if (!result.IsSuccess())
+            args.Cancel = true;
     }
+
     public void GanttRowUpdating(RowUpdatingEventArgs<ProjectSchedule> args)
     {
 
@@ -389,6 +396,19 @@ public class ScheduleManager
     public void GanttRowUpdated(RowUpdatedEventArgs<ProjectSchedule> args)
     {
 
+    }
+
+    public async Task GanttRowDeleting(RowDeletingEventArgs<ProjectSchedule> args)
+    {
+        if (args.Datas?.Count != 1)
+        {
+            args.Cancel = true;
+            return;
+        }
+
+        var result = await ItemDeletePost.Invoke(args.Datas.FirstOrDefault());
+        if (!result.IsSuccess())
+            args.Cancel = true;
     }
 
     public void GanttSearched(SearchedEventArgs args)
