@@ -474,9 +474,6 @@ public class SchedulePageVM : PageVMBase, IDisposable
             else
                 ProgressStop();
 
-            if (SM.Gantt is not null)
-                await InvokeAsync(SM.Gantt.RefreshAsync);
-           
             //await InvokeAsync(StateHasChanged);
         }
     }
