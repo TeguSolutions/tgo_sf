@@ -63,6 +63,9 @@ public class ProjectSchedule
 
     public bool IsHidden { get; set; }
 
+    [JsonIgnore]
+    public int SortOrderNo => OrderNo;
+
     #region Nav - Project
 
     public Guid ProjectId { get; set; }

@@ -1004,7 +1004,7 @@ public class EstimatePageOldVM : PageVMBase, IDisposable
                 count = count + 1;
 
             var schedule = new ProjectSchedule(id: Guid.NewGuid(), count, projectId: SelectedProject.Id, apuId: apu.Id);
-            var projectScheduleResult = await ProjectScheduleRepo.AddAsync(schedule);
+            var projectScheduleResult = await ProjectScheduleRepo.AddAsync(schedule, null);
             if (!projectScheduleResult.IsSuccess())
                 ShowError("Failed to create Project Schedule: " + projectScheduleResult.Message);
         }
@@ -1311,7 +1311,7 @@ public class EstimatePageOldVM : PageVMBase, IDisposable
         if (deletableSchedule is null)
             return;
 
-        var deleteResult = await ProjectScheduleRepo.DeleteAsync(deletableSchedule.Id);
+        var deleteResult = await ProjectScheduleRepo.DeleteAsync(deletableSchedule.Id, null);
         if (!deleteResult.IsSuccess())
         {
             ShowError("Failed to delete Project Schedule Item!");
@@ -1321,12 +1321,13 @@ public class EstimatePageOldVM : PageVMBase, IDisposable
         schedules.Remove(deletableSchedule);
         schedules = schedules.OrderBy(q => q.OrderNo).ToList();
 
-        var orderedSchedules = new List<Tuple<Guid, int, Guid?>>();
+        var orderedSchedules = new List<ProjectSchedule>();
 
         var orderNo = 1;
         foreach (var schedule in schedules)
         {
-            orderedSchedules.Add(new Tuple<Guid, int, Guid?>(schedule.Id, orderNo, schedule.ParentId));
+            schedule.OrderNo = orderNo;
+            orderedSchedules.Add(schedule);
             orderNo++;
         }
 

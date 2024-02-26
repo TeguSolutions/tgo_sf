@@ -1,6 +1,6 @@
 ﻿using Syncfusion.Blazor.Gantt;
 using Syncfusion.Blazor.Navigations;
-using Action = System.Action;
+using Syncfusion.Blazor.TreeGrid.Internal;
 
 #pragma warning disable BL0005
 
@@ -18,6 +18,8 @@ public class ScheduleManager
 
     public ScheduleManager()
     {
+	    NewRowPosition = RowPosition.Bottom;
+
         GanttHolidays = new List<GanttHoliday>();
     }
 
@@ -32,13 +34,13 @@ public class ScheduleManager
 
     #region Callbacks
 
-    internal Action StateChanged { get; set; }
+    internal Action<string, bool, bool> ShowError { get; set; }
 
-    internal Func<ProjectSchedule, Task<Result>> ItemAdd { get; set; }
+    internal Func<ProjectSchedule, List<ProjectSchedule>, Task> ItemAdd { get; set; }
     internal Action<ProjectSchedule> ItemUpdate { get; set; }
-    internal Action ItemUpdateOrderNos { get; set; }
-    internal Action ItemDeletePre { get; set; }
-    internal Func<ProjectSchedule, Task<Result>> ItemDeletePost { get; set; }
+    internal Func<List<ProjectSchedule>, Task> ItemUpdateOrderNos { get; set; }
+
+    internal Func<ProjectSchedule, List<ProjectSchedule>, Task> ItemDeletePost { get; set; }
 
     #endregion
 
@@ -110,7 +112,7 @@ public class ScheduleManager
     {
         if (args.Item.Id == "cst_delete")
         {
-            ItemDeletePre.Invoke();
+            ScheduleItemDeletePreGantt();
         }
 
         else if (args.Item.Text == "Excel export")
@@ -207,38 +209,14 @@ public class ScheduleManager
 
     internal List<ProjectSchedule> ScheduleItems { get; set; }
 
-    internal void SortItems()
+    private void SortItems()
     {
         ScheduleItems = ScheduleItems
             .OrderBy(q => q.OrderNo)
             .ToList();
     }
 
-    internal int GetAllCount()
-    {
-        return ScheduleItems.Count;
-    }
-
-    internal List<Tuple<Guid, int, Guid?>> GetOrderNosAndParentIds()
-    {
-        if (Gantt is null)
-            return null;
-
-        var itemOrders = new List<Tuple<Guid, int, Guid?>>();
-
-        var i = 1;
-
-        foreach (var item in ScheduleItems)
-        {
-            item.OrderNo = i;
-            itemOrders.Add(new Tuple<Guid, int, Guid?>(item.Id, item.OrderNo, item.ParentId));
-            i++;
-        }
-
-        return itemOrders;
-    }
-
-    internal bool HasChild(Guid id)
+    private bool HasChild(Guid id)
     {
         if (ScheduleItems is null)
             return false;
@@ -264,6 +242,18 @@ public class ScheduleManager
             return null;
 
         return selectedRecords[0];
+    }
+
+    private List<ProjectSchedule> ReassignOrderNos(List<ProjectSchedule> items)
+    {
+        var no = 1;
+        foreach (var fd in items)
+        {
+            fd.OrderNo = no;
+            no++;
+        }
+
+        return items;
     }
 
     #endregion
@@ -311,21 +301,36 @@ public class ScheduleManager
         return string.IsNullOrWhiteSpace(errors) ? Result.Ok() : Result.Fail(errors);
     }    
 
+    private async void ScheduleItemDeletePreGantt()
+    {
+        var selectedItems = await Gantt.GetSelectedRecordsAsync();
+        var selectedItem = selectedItems?.FirstOrDefault();
+
+        // Validation
+        if (selectedItem is null)
+        {
+            ShowError.Invoke("Select a Schedule Item!", false, false);
+            return;
+        }
+        if (selectedItem.ApuId is not null)
+        {
+            ShowError.Invoke("Schedule belongs to Apu, delete the Apu!", false, false);
+            return;
+        }
+        if (HasChild(selectedItem.Id))
+        {
+            ShowError.Invoke("First delete or move the child items!", false, false);
+            return;
+        }
+
+        // Triggers - GanttRowDeleting event
+        //await SM.Gantt.DeleteRecordAsync(selectedItem.Id); - not working
+        await Gantt.DeleteRecordAsync();
+    }
+
     #endregion
 
     #region Gantt - Events
-
-    public void GanttOnActionBegin(GanttActionEventArgs<ProjectSchedule> args)
-    {
-        if (args.RequestType == SfGanttAction.Refresh)
-            return;
-
-        // Any update/save action
-        if (args.RequestType == SfGanttAction.Save)
-        {
-
-        }
-    }
 
     public void GanttOnActionComplete(GanttActionEventArgs<ProjectSchedule> args)
     {
@@ -339,81 +344,70 @@ public class ScheduleManager
             {
                 ItemUpdate.Invoke(args.Data);
             }
-            else
-            { }
-        }
-        // Indent/Outdent
-        else if (args.RequestType == SfGanttAction.RowDragAndDrop)
-        {
-            // Unused
-        }
-        else
-        {
-            
         }
     }
 
     // Including classic Drag&Drop and/or Indent/Outdent
-    public void GanttRowDropped(RowDroppedEventArgs<ProjectSchedule> args)
+    public async Task GanttRowDropped(RowDroppedEventArgs<ProjectSchedule> args)
     {
-        ItemUpdateOrderNos.Invoke();
+        // Can't see how to use this info...
+        //var fromIndex = args.FromIndex;
+        //var dropIndex = args.DropIndex;
+
+        var itemsWithReassignedOrderNos = ReassignOrderNos(ScheduleItems);
+        await ItemUpdateOrderNos.Invoke(itemsWithReassignedOrderNos);
     }
 
-
-    internal async Task GanttRowCreating(GanttRowCreatingEventArgs<ProjectSchedule> args)
+    internal async Task GanttRowCreated(GanttRowCreatedEventArgs<ProjectSchedule> args)
     {
-        if (args.Data is null)
-        {
-            args.Cancel = true;
-            return;
-        }
-
+        // Step 1: Set the newly added item
         var selectedSchedule = await GetSelectedItemAsync();
         Guid? parentId = null;
-        var orderNo = GetAllCount() + 1;
         if (selectedSchedule is not null)
         {
             parentId = selectedSchedule.ParentId;
-            orderNo = selectedSchedule.OrderNo + 1;
         }
 
         if (args.Data.Id == Guid.Empty)
             args.Data.Id = Guid.NewGuid();
         args.Data.ParentId = parentId;
-        args.Data.OrderNo = orderNo;
-        //args.Data.ProjectId = SelectedProjectModel.Id;
         args.Data.Description = args.Data.GanttCustomDescription;
 
-        var result = await ItemAdd.Invoke(args.Data);
-        if (!result.IsSuccess())
-            args.Cancel = true;
+        // Step 2: Reassign the OrderNos
+        var itemsWithReassignedOrderNos = ReassignOrderNos(Gantt.FlatData.Cast<TreeListItem<ProjectSchedule>>().Select(q => q.DataItem).ToList());
+        await ItemAdd.Invoke(args.Data, itemsWithReassignedOrderNos);
     }
 
-    public void GanttRowUpdating(RowUpdatingEventArgs<ProjectSchedule> args)
-    {
-
-    }
-    public void GanttRowUpdated(RowUpdatedEventArgs<ProjectSchedule> args)
-    {
-
-    }
-
-    public async Task GanttRowDeleting(RowDeletingEventArgs<ProjectSchedule> args)
+    public async Task GanttRowDeleted(RowDeletedEventArgs<ProjectSchedule> args)
     {
         if (args.Datas?.Count != 1)
         {
-            args.Cancel = true;
             return;
         }
 
-        var result = await ItemDeletePost.Invoke(args.Datas.FirstOrDefault());
-        if (!result.IsSuccess())
-            args.Cancel = true;
+        var itemsWithReassignedOrderNos = ReassignOrderNos(Gantt.FlatData.Cast<TreeListItem<ProjectSchedule>>().Select(q => q.DataItem).ToList());
+
+        await ItemDeletePost.Invoke(args.Datas.First(), itemsWithReassignedOrderNos);
     }
 
     public void GanttSearched(SearchedEventArgs args)
     {
         Gantt.RefreshAsync();
+    }
+
+    #endregion
+
+    #region Gantt Row Position
+
+    internal RowPosition NewRowPosition { get; set; }
+
+    internal void GanttRowSelected(RowSelectEventArgs<ProjectSchedule> args)
+    {
+	    NewRowPosition = RowPosition.Below;
+    }
+    internal void GanttRowDeselected(RowDeselectEventArgs<ProjectSchedule> args)
+    {
+        NewRowPosition = RowPosition.Bottom;
     }
 
     #endregion
@@ -439,23 +433,6 @@ public class ScheduleManager
             Console.WriteLine(e);
         }
     }
-
-    #endregion
-
-    #region CRUD
-
-    //internal void Update(ProjectSchedule ps)
-    //{
-    //    var lps = ScheduleItems.FirstOrDefault(q => q.Id == ps.Id);
-    //    if (lps is null)
-    //        return;
-
-    //    var i = ScheduleItems.IndexOf(lps);
-    //    if (i == -1)
-    //        return;
-
-    //    ScheduleItems[i] = ps;
-    //}
 
     #endregion
 }

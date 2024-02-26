@@ -19,13 +19,27 @@ public class ProjectScheduleRepository : IRepository
 
     #region Create
 
-    public async Task<Result> AddAsync(ProjectSchedule schedule)
+    public async Task<Result> AddAsync(ProjectSchedule newSchedule, List<ProjectSchedule> updatedSchedules)
     {
         try
         {
             var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
-            await dbContext.ProjectSchedules.AddAsync(schedule);
+            await dbContext.ProjectSchedules.AddAsync(newSchedule);
+
+            if (updatedSchedules is not null)
+            {
+                var dbSchedules = await dbContext.ProjectSchedules.Where(q => q.ProjectId == newSchedule.ProjectId).ToListAsync();
+                foreach (var schedule in updatedSchedules)
+                {
+                    var dbSchedule = dbSchedules.FirstOrDefault(q => q.Id == schedule.Id);
+                    if (dbSchedule is not null)
+                        dbSchedule.OrderNo = schedule.OrderNo;
+                }
+
+                dbContext.ProjectSchedules.UpdateRange(dbSchedules);
+            }
+
             await dbContext.SaveChangesAsync();
 
             return Result.Ok();
@@ -142,7 +156,7 @@ public class ProjectScheduleRepository : IRepository
         }
     }
 
-    public async Task<Result> UpdateOrderNosAndParentIdAsync(Guid projectId, List<Tuple<Guid, int, Guid?>> p)
+    public async Task<Result> UpdateOrderNosAndParentIdAsync(Guid projectId, List<ProjectSchedule> pss)
     {
         try
         {
@@ -152,11 +166,11 @@ public class ProjectScheduleRepository : IRepository
 
             foreach (var dbSchedule in dbSchedules)
             {
-                var schedule = p.FirstOrDefault(q => q.Item1 == dbSchedule.Id);
+                var schedule = pss.FirstOrDefault(q => q.Id == dbSchedule.Id);
                 if (schedule is not null)
                 {
-                    dbSchedule.OrderNo = schedule.Item2;
-                    dbSchedule.ParentId = schedule.Item3;
+                    dbSchedule.OrderNo = schedule.OrderNo;
+                    dbSchedule.ParentId = schedule.ParentId;
                 }
                 else
                 {
@@ -182,15 +196,32 @@ public class ProjectScheduleRepository : IRepository
 
     #region Delete
 
-    public async Task<Result> DeleteAsync(Guid id)
+    public async Task<Result> DeleteAsync(Guid id, List<ProjectSchedule> updatedSchedules)
     {
         try
         {
             var dbContext = await _dbContextFactory.CreateDbContextAsync();
 
-            var schedule = await dbContext.ProjectSchedules.FirstAsync(q => q.Id == id);
-            dbContext.ProjectSchedules.Remove(schedule);
-            await dbContext.SaveChangesAsync();
+            var dbRemovedSchedule = await dbContext.ProjectSchedules.FirstOrDefaultAsync(q => q.Id == id);
+            if (dbRemovedSchedule is not null)
+            {
+                dbContext.ProjectSchedules.Remove(dbRemovedSchedule);
+                await dbContext.SaveChangesAsync();
+            }
+
+            if (updatedSchedules is not null)
+            {
+                var dbSchedules = await dbContext.ProjectSchedules.Where(q => q.ProjectId == dbRemovedSchedule.ProjectId).ToListAsync();
+                foreach (var schedule in updatedSchedules)
+                {
+                    var dbSchedule = dbSchedules.FirstOrDefault(q => q.Id == schedule.Id);
+                    if (dbSchedule is not null)
+                        dbSchedule.OrderNo = schedule.OrderNo;
+                }
+
+                dbContext.ProjectSchedules.UpdateRange(dbSchedules);
+                await dbContext.SaveChangesAsync();
+            }
 
             return Result.Ok();
         }

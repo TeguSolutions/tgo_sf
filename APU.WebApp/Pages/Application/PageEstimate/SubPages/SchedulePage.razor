@@ -107,10 +107,7 @@
                                      ShowColumnChooser="true" ShowColumnMenu="true" ShowInlineNotes="true"
                                      ScrollToTaskbarOnClick="true">
 
-                                @*
-                                    Unused:
-                                    Progress="@nameof(ProjectSchedule.Progress)"
-                                *@
+                                @* *@
                                 <GanttTaskFields Id="@nameof(ProjectSchedule.Id)"
                                                  ParentID="@nameof(ProjectSchedule.ParentId)"
                                                  Dependency="@nameof(ProjectSchedule.Predecessor)"
@@ -128,33 +125,30 @@
                                 *@
                                 <GanttEvents TValue="ProjectSchedule"
                                              OnToolbarClick="@SM.GanttToolbarClick"
-                                             OnActionBegin="@SM.GanttOnActionBegin"
-                                             OnActionComplete="@SM.GanttOnActionComplete"
                                              Searched="@SM.GanttSearched"
 
-                                             RowDropped="@SM.GanttRowDropped"
-                                             RowCreating="@SM.GanttRowCreating"
-                                             RowUpdating="@SM.GanttRowUpdating"
-                                             RowUpdated="@SM.GanttRowUpdated"
-                                             RowDeleting="@SM.GanttRowDeleting"/>
+                                             OnActionComplete="@SM.GanttOnActionComplete"
 
-                                @*
-                                    Don't use!
-                                    NewRowPosition="RowPosition.Below"
-                                *@
+                                             RowCreated="@SM.GanttRowCreated"
+                                             RowDropped="@SM.GanttRowDropped"
+                                             RowDeleted="@SM.GanttRowDeleted"
+
+                                             RowSelected="@SM.GanttRowSelected"
+                                             RowDeselected="@SM.GanttRowDeselected"/>
+                                @* *@
                                 <GanttEditSettings AllowAdding="true" AllowDeleting="true"
                                                    AllowEditing="true" AllowTaskbarEditing="true"
                                                    AllowSchedulingOnDrag="true"
                                                    ShowDeleteConfirmDialog="true"
-                                                   Mode="SfGanttEditMode.Dialog"/>
+                                                   Mode="@SfGanttEditMode.Dialog"
+                                                   NewRowPosition="@SM.NewRowPosition"/>
 
-                                <GanttFilterSettings HierarchyMode="FilterHierarchyMode.Both"/>
+                                <GanttFilterSettings HierarchyMode="@FilterHierarchyMode.Both"/>
 
                                 <GanttSearchSettings Fields="@(new[] { "GanttDescription" })" Operator="Operator.Contains"
                                                      Key="" IgnoreCase="true" IgnoreAccent="true"/>
 
                                 <GanttSplitterSettings Collapsible="true" Position="615px"/>
-
 
                                 <GanttTimelineSettings TimelineUnitSize="33" TimelineViewMode="TimelineViewMode.None" WeekStartDay="0" UpdateTimescaleView="true">
                                     <GanttTopTierSettings Unit="TimelineViewMode.Month" Format="yyyy MMM" />
@@ -164,38 +158,38 @@
                                 @* <GanttLabelSettings TValue="ProjectSchedule" /> *@
 
                                 <GanttColumns>
-                                    <GanttColumn Field="@nameof(ProjectSchedule.Id)" Visible="false" Width="320px" IsPrimaryKey="true"/>
+                                    <GanttColumn Field="@nameof(ProjectSchedule.Id)" Visible="false" Width="320px" IsPrimaryKey="true" AllowSorting="false"/>
 
                                     @*
                                         AllowFiltering="true"
                                         FilterSettings="new FilterSettings { Operator = Operator.Equal, Type = FilterType.CheckBox  }"
                                     *@
-                                    <GanttColumn Field="@nameof(ProjectSchedule.IsHidden)" HeaderText="Is Hidden" Width="40px" AllowEditing="false">
+                                    <GanttColumn Field="@nameof(ProjectSchedule.IsHidden)" HeaderText="Is Hidden" Width="40px" AllowEditing="false" AllowSorting="false">
                                         <HeaderTemplate>
                                             <span></span>
                                         </HeaderTemplate>
                                         <Template>
                                             @{
                                                 var ps = (ProjectSchedule)context;
-                                                <input class="csr-ptr" style="width: 18px; height: 18px; margin-top: 5px;" type="checkbox" checked="@ps.IsHidden" @oninput="@(() => ScheduleItemUpdateIsHidden(ps))"/>
+                                                <input class="csr-ptr" style="width: 18px; height: 18px; margin-top: 5px;" type="checkbox" checked="@ps.IsHidden" @oninput="@(() => ScheduleItem_UpdateIsHidden(ps))"/>
                                             }
                                         </Template>
                                     </GanttColumn>
 
-                                    <GanttColumn Field="@nameof(ProjectSchedule.OrderNo)" HeaderText="No" Width="45px" AllowEditing="false">
+                                    <GanttColumn Field="@nameof(ProjectSchedule.SortOrderNo)" HeaderText="No" Width="45px" AllowEditing="false">
                                         <Template>
-                                            <span>@(((ProjectSchedule)context).OrderNo)</span>
+                                            <span>@(((ProjectSchedule)context).SortOrderNo)</span>
                                         </Template>
                                     </GanttColumn>
 
-                                    <GanttColumn Field="@nameof(ProjectSchedule.GanttDescription)" HeaderText="Description" Width="500px" ClipMode="ClipMode.EllipsisWithTooltip"/>
-                                    <GanttColumn Field="@nameof(ProjectSchedule.StartDate)" HeaderText="Start Date" Width="110px"/>
-                                    <GanttColumn Field="@nameof(ProjectSchedule.EndDate)" HeaderText="End Date" Width="100px"/>
-                                    <GanttColumn Field="@nameof(ProjectSchedule.Duration)" HeaderText="Duration" Width="110px"/>
-                                    <GanttColumn Field="@nameof(ProjectSchedule.Progress)" HeaderText="Progress" Width="110px" />
-                                    <GanttColumn Field="@nameof(ProjectSchedule.Predecessor)" HeaderText="Dependency" Width="200px"/>
+                                    <GanttColumn Field="@nameof(ProjectSchedule.GanttDescription)" HeaderText="Description" Width="500px" ClipMode="ClipMode.EllipsisWithTooltip" AllowSorting="false" />
+                                    <GanttColumn Field="@nameof(ProjectSchedule.StartDate)" HeaderText="Start Date" Width="110px" AllowSorting="false" />
+                                    <GanttColumn Field="@nameof(ProjectSchedule.EndDate)" HeaderText="End Date" Width="100px" AllowSorting="false" />
+                                    <GanttColumn Field="@nameof(ProjectSchedule.Duration)" HeaderText="Duration" Width="110px" AllowSorting="false" />
+                                    <GanttColumn Field="@nameof(ProjectSchedule.Progress)" HeaderText="Progress" Width="110px" AllowSorting="false" />
+                                    <GanttColumn Field="@nameof(ProjectSchedule.Predecessor)" HeaderText="Dependency" Width="200px" AllowSorting="false" />
 
-                                    <GanttColumn Field="@nameof(ProjectSchedule.GanttCustomDescription)" HeaderText="Custom Description" Visible="true" Width="0px"/>
+                                    <GanttColumn Field="@nameof(ProjectSchedule.GanttCustomDescription)" HeaderText="Custom Description" Visible="true" Width="0px" AllowSorting="false" />
                                 </GanttColumns>
                             </SfGantt>
 

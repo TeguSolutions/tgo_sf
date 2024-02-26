@@ -177,13 +177,13 @@ public class SchedulePageVM : PageVMBase, IDisposable
     protected override void OnInitialized()
     {
         SM = new ScheduleManager();
-        SM.StateChanged = StateChanged;
+
+        SM.ShowError = ShowError;
 
         SM.ItemAdd = ScheduleItemAddAsync;
-        SM.ItemUpdate = ScheduleItemUpdateSingle;
-        SM.ItemUpdateOrderNos = () => _ = ScheduleItemUpdateOrderNosAndParentIdsAsync();
-        SM.ItemDeletePre = ScheduleItemDeletePreGantt;
-        SM.ItemDeletePost = ScheduleItemDeletePostDb;
+        SM.ItemUpdate = ScheduleItem_UpdateSingle;
+        SM.ItemUpdateOrderNos = ScheduleItem_UpdateOrderNosAndParentIdsAsync;
+        SM.ItemDeletePost = ScheduleItem_DeletePostDb;
 
         base.OnInitialized();
     }
@@ -440,6 +440,8 @@ public class SchedulePageVM : PageVMBase, IDisposable
         else
         {
             ProgressStart();
+            // Wait to put the Gantt into the view!
+            await Task.Delay(100);
 
             // Step 1: Get the LineItems
             var projectResult = await ProjectRepo.GetAsync(SelectedProjectModel.Id, false, true);
@@ -473,8 +475,6 @@ public class SchedulePageVM : PageVMBase, IDisposable
                 ShowError(dataResult.Message);
             else
                 ProgressStop();
-
-            //await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -544,9 +544,9 @@ public class SchedulePageVM : PageVMBase, IDisposable
         SelectedProjectModel.HasSchedule = true;
         ProjectHub.SendProjectHasScheduleUpdate(SelectedProjectModel.Id, true);
 
-        ProgressStop();
-
         await ProjectScheduleLoadAsync();
+
+        //ProgressStop();
 
         ScheduleHub.SendScheduleUpdate(SelectedProject.Id);
     }
@@ -632,8 +632,6 @@ public class SchedulePageVM : PageVMBase, IDisposable
 
         await ProjectScheduleLoadAsync();
 
-        await ScheduleItemUpdateOrderNosAndParentIdsAsync();
-
         ScheduleHub.SendScheduleUpdate(SelectedProject.Id);
     }
 
@@ -675,36 +673,37 @@ public class SchedulePageVM : PageVMBase, IDisposable
 
     #region Project Schedule Items - CRUD
 
-    private async Task<Result> ScheduleItemAddAsync(ProjectSchedule ps)
+    private async Task ScheduleItemAddAsync(ProjectSchedule ps, List<ProjectSchedule> updatedPss)
     {
         if (ps is null)
         {
             ShowError("Project Schedule is null!");
-            return Result.Fail();
+            return;
         }
 
         if (SelectedProject is null)
         {
             ShowError("Select a Project!?");
-            return Result.Fail();
+            return;
         }
+
+        ProgressStart();
 
         ps.ProjectId = SelectedProject.Id;
 
-        var addResult = await ProjectScheduleRepo.AddAsync(ps);
+        var addResult = await ProjectScheduleRepo.AddAsync(ps, updatedPss);
         if (!addResult.IsSuccess())
         {
             ShowError(addResult);
-            return Result.Fail();
+            return;
         }
 
-        //SM.SortItems();
+        ProgressStop();
 
-        await ScheduleItemUpdateOrderNosAndParentIdsAsync();
-        return Result.Ok();
+        ScheduleHub.SendScheduleUpdate(SelectedProjectModel.Id);
     }
 
-    internal async void ScheduleItemUpdateIsHidden(ProjectSchedule schedule)
+    internal async void ScheduleItem_UpdateIsHidden(ProjectSchedule schedule)
     {
         ProgressStart();
         
@@ -717,7 +716,6 @@ public class SchedulePageVM : PageVMBase, IDisposable
         }
 
         schedule.IsHidden = !schedule.IsHidden;
-        //SM.Update(schedule);
 
         SM.GanttFilterAsync(SM.IsHidden);
 
@@ -726,7 +724,7 @@ public class SchedulePageVM : PageVMBase, IDisposable
         ScheduleHub.SendScheduleUpdate(SelectedProjectModel.Id);
     }
 
-    private async void ScheduleItemUpdateSingle(ProjectSchedule ps)
+    private async void ScheduleItem_UpdateSingle(ProjectSchedule ps)
     {
         ProgressStart();
 
@@ -756,31 +754,16 @@ public class SchedulePageVM : PageVMBase, IDisposable
             return;
         }
 
-        //SM.Update(ps);
-        //await SM.Gantt.RefreshAsync();
         ProgressStop();
 
         ScheduleHub.SendScheduleUpdate(SelectedProjectModel.Id);
     }
 
-    private async Task ScheduleItemUpdateOrderNosAndParentIdsAsync()
+    private async Task ScheduleItem_UpdateOrderNosAndParentIdsAsync(List<ProjectSchedule> pss)
     {
-        if (SelectedProject is null)
-        {
-            ShowError("Select a Project!");
-            return;
-        }
-
-        var scheduleOrders = SM.GetOrderNosAndParentIds();
-        if (scheduleOrders is null)
-        {
-            ShowError("Failed to get the Orders!");
-            return;
-        }
-
         ProgressStart();
 
-        var result = await ProjectScheduleRepo.UpdateOrderNosAndParentIdAsync(SelectedProject.Id, scheduleOrders);
+        var result = await ProjectScheduleRepo.UpdateOrderNosAndParentIdAsync(SelectedProject.Id, pss);
         if (!result.IsSuccess())
         {
             ShowError("Failed to update Schedule Item OrderNos! " + result.Message);
@@ -792,56 +775,20 @@ public class SchedulePageVM : PageVMBase, IDisposable
         ScheduleHub.SendScheduleUpdate(SelectedProjectModel.Id);
     }
 
-    private async void ScheduleItemDeletePreGantt()
-    {
-        var selectedItems = await SM.Gantt.GetSelectedRecordsAsync();
-        var selectedItem = selectedItems?.FirstOrDefault();
-
-        // Validation
-        if (selectedItem is null)
-        {
-            ShowError("Select a Schedule Item!");
-            return;
-        }
-        if (selectedItem.ApuId is not null)
-        {
-            ShowError("Schedule belongs to Apu, delete the Apu!");
-            return;
-        }
-        if (SM.HasChild(selectedItem.Id))
-        {
-            ShowError("First delete or move the child items!");
-            return;
-        }
-
-        // Triggers - GanttRowDeleting event
-        //await SM.Gantt.DeleteRecordAsync(selectedItem.Id); - not working
-        await SM.Gantt.DeleteRecordAsync();
-    }
-
-    private async Task<Result> ScheduleItemDeletePostDb(ProjectSchedule ps)
+    private async Task ScheduleItem_DeletePostDb(ProjectSchedule ps, List<ProjectSchedule> updatedPss)
     {
         ProgressStart();
 
-        var result = await ProjectScheduleRepo.DeleteAsync(ps.Id);
+        var result = await ProjectScheduleRepo.DeleteAsync(ps.Id, updatedPss);
         if (!result.IsSuccess())
         {
             ShowError(result.Message);
-            return Result.Fail();
+            return;
         }
 
-        await ScheduleItemUpdateOrderNosAndParentIdsAsync();
-
-        return Result.Ok();
-    }
-
-    #endregion
-
-    #region Utils
-
-    public async void StateChanged()
-    {
-        await InvokeAsync(StateHasChanged);
+        ProgressStop();
+ 
+        ScheduleHub.SendScheduleUpdate(SelectedProjectModel.Id);
     }
 
     #endregion
