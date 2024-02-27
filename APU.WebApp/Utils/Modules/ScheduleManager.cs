@@ -374,7 +374,9 @@ public class ScheduleManager
         args.Data.Description = args.Data.GanttCustomDescription;
 
         // Step 2: Reassign the OrderNos
-        var itemsWithReassignedOrderNos = ReassignOrderNos(Gantt.FlatData.Cast<TreeListItem<ProjectSchedule>>().Select(q => q.DataItem).ToList());
+        //var itemsWithReassignedOrderNos = ReassignOrderNos(Gantt.FlatData.Cast<TreeListItem<ProjectSchedule>>().Select(q => q.DataItem).ToList());
+        //var itemsWithReassignedOrderNos = ReassignOrderNos(ScheduleItems);
+        var itemsWithReassignedOrderNos = ReassignOrderNos(Gantt.DataSource.ToList());
         await ItemAdd.Invoke(args.Data, itemsWithReassignedOrderNos);
     }
 
@@ -385,8 +387,8 @@ public class ScheduleManager
             return;
         }
 
-        var itemsWithReassignedOrderNos = ReassignOrderNos(Gantt.FlatData.Cast<TreeListItem<ProjectSchedule>>().Select(q => q.DataItem).ToList());
-
+        //var itemsWithReassignedOrderNos = ReassignOrderNos(Gantt.FlatData.Cast<TreeListItem<ProjectSchedule>>().Select(q => q.DataItem).ToList());
+        var itemsWithReassignedOrderNos = ReassignOrderNos(Gantt.DataSource.ToList());
         await ItemDeletePost.Invoke(args.Datas.First(), itemsWithReassignedOrderNos);
     }
 
